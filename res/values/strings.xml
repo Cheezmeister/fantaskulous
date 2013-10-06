@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Fantaskulous</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="date_created">Date created</string>
+    <string name="save">Save</string>
+    <string name="fmt_not_found">%1$s not found! The exception thrown was %2$s</string>
+    <string name="unknown">Unknown</string>
+
+</resources>

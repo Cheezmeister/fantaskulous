@@ -1,0 +1,25 @@
+{
+  lists : [
+    {
+      name : 'groceries',
+      tasks : [
+        {
+          description : 'milk'
+        }, {
+          description : 'fish'
+        }, {
+          description : 'eggs'
+        }
+      ]
+    }, {
+      name : 'home',
+      tasks : [
+        {
+          description : 'vacuum'
+        }, {
+          description : 'trash'
+        }
+      ]
+    }
+  ]
+}
