@@ -1,5 +1,8 @@
 package com.luchenlabs.fantaskulous.view;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +15,7 @@ import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
-public class TaskArrayAdapter extends ArrayAdapter<Task> implements ListAdapter {
+public class TaskArrayAdapter extends ArrayAdapter<Task> implements ListAdapter, Observer {
 
     private final LayoutInflater _inflater;
 
@@ -20,6 +23,7 @@ public class TaskArrayAdapter extends ArrayAdapter<Task> implements ListAdapter 
             int textViewResourceId, TaskList taskList) {
         super(context, 0, taskList.getTasks());
         _inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        taskList.addObserver(this);
     }
 
     /*
@@ -36,6 +40,16 @@ public class TaskArrayAdapter extends ArrayAdapter<Task> implements ListAdapter 
         String description = getItem(position).getDescription();
         textView.setText(description);
         return v;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+     */
+    @Override
+    public void update(Observable observable, Object data) {
+        notifyDataSetChanged();
     }
 
 }

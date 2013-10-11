@@ -3,6 +3,7 @@ package com.luchenlabs.fantaskulous.app;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ import android.view.Menu;
 import com.google.gson.JsonParseException;
 import com.luchenlabs.fantaskulous.C;
 import com.luchenlabs.fantaskulous.G;
-import com.luchenlabs.fantaskulous.Persister;
+import com.luchenlabs.fantaskulous.JsonPersister;
 import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.model.TaskList;
 import com.luchenlabs.fantaskulous.view.TaskListFragmentPagerAdapter;
@@ -52,9 +53,25 @@ public class MainActivity extends FragmentActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see android.support.v4.app.FragmentActivity#onStop()
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected void onStop() {
+        new SaveTaskListTask().execute(G.getState().getTaskLists());
+        super.onStop();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void saveTasks() {
+        new SaveTaskListTask().execute(G.getState().getTaskLists());
     }
 
     private class LoadTaskListTask extends AsyncTask<Void, Void, List<TaskList>> {
@@ -68,27 +85,36 @@ public class MainActivity extends FragmentActivity {
                 Log.w(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename, e));
             }
 
-            if (is == null) {
+            List<TaskList> lists = null;
+            if (is != null) {
+                try {
+                    lists = JsonPersister.load(is);
+                } catch (JsonParseException e) {
+                    Log.e(getClass().getSimpleName(), getString(R.string.fmt_invalid_json, filename));
+                } catch (Exception e) {
+                    Log.e(getClass().getSimpleName(), getString(R.string.fmt_invalid_json, filename));
+                }
+            }
+            if (lists == null) {
                 try {
                     AssetManager assetManager = getAssets();
                     is = assetManager.open(filename);
                 } catch (IOException e) {
                     Log.wtf(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename, e));
                 }
-            }
-
-            if (is == null)
-                return new ArrayList<TaskList>(10);
-
-            List<TaskList> lists = null;
-            try {
-                lists = Persister.load(is);
-            } catch (JsonParseException e) {
-                Log.wtf(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename));
+                if (is != null) {
+                    try {
+                        lists = JsonPersister.load(is);
+                    } catch (JsonParseException e) {
+                        Log.e(getClass().getSimpleName(), getString(R.string.fmt_invalid_json, filename));
+                    } catch (Exception e) {
+                        Log.e(getClass().getSimpleName(), getString(R.string.fmt_invalid_json, filename));
+                    }
+                }
             }
 
             if (lists == null)
-                return new ArrayList<TaskList>(10);
+                return new ArrayList<TaskList>();
 
             return lists;
         }
@@ -104,6 +130,31 @@ public class MainActivity extends FragmentActivity {
 
             handleTasksLoaded(result);
         }
+    }
+
+    private class SaveTaskListTask extends AsyncTask<List<TaskList>, Void, Void> {
+
+        @Override
+        protected Void doInBackground(List<TaskList>... params) {
+            String filename = C.TASK_FILE;
+            OutputStream os = null;
+
+            try {
+                os = openFileOutput(filename, MODE_PRIVATE);
+            } catch (FileNotFoundException e) {
+                Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
+            }
+
+            ArrayList<TaskList> lists = new ArrayList<TaskList>(params[0]);
+
+            try {
+                JsonPersister.save(os, lists);
+            } catch (IOException e) {
+                Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
+            }
+            return null;
+        }
+
     }
 
 }

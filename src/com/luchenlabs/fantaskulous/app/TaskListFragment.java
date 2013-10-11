@@ -4,13 +4,16 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ListView;
+import android.widget.EditText;
 
 import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.R;
+import com.luchenlabs.fantaskulous.controller.TaskListController;
 import com.luchenlabs.fantaskulous.model.TaskList;
 import com.luchenlabs.fantaskulous.view.TaskArrayAdapter;
+import com.luchenlabs.fantaskulous.view.TaskListView;
 
 public class TaskListFragment extends Fragment {
 
@@ -40,8 +43,23 @@ public class TaskListFragment extends Fragment {
         this._position = getArguments().getInt(ARG_TASKLIST);
         View v = inflater.inflate(R.layout.fragment_tasklist, null);
         TaskList taskList = G.getState().getTaskLists().get(_position);
-        ((ListView) v.findViewById(R.id.taskListView)).setAdapter(
-                new TaskArrayAdapter(getActivity(), R.layout.view_task, 0, taskList));
+        TaskArrayAdapter adapter = new TaskArrayAdapter(getActivity(), R.layout.view_task, 0, taskList);
+
+        TaskListView taskListView = (TaskListView) v.findViewById(R.id.taskListView);
+        taskListView.setTaskList(taskList);
+        taskListView.setAdapter(adapter);
+
+        final View btnAdd = v.findViewById(R.id.btnAdd);
+        final EditText fieldDescription = (EditText) v.findViewById(R.id.fieldDesc);
+
+        final TaskListController controller = new TaskListController(taskList);
+        btnAdd.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                controller.addTask(fieldDescription.getText());
+            }
+        });
+
         return v;
     }
 
