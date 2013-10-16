@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <view
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/taskListListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/fieldDesc"
+        class="com.luchenlabs.fantaskulous.view.TaskListListView" />
+
+    <EditText
+        android:id="@+id/fieldDesc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:ems="10"
+        android:hint="@string/hint_new_task" >
+
+        <requestFocus />
+    </EditText>
+
+</RelativeLayout>

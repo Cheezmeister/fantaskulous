@@ -25,13 +25,14 @@ import com.luchenlabs.fantaskulous.view.TaskListFragmentPagerAdapter;
 
 public class MainActivity extends FragmentActivity {
 
-    protected static void handleTasksLoaded(List<TaskList> result) {
+    private TaskListFragmentPagerAdapter _pagerAdapter;
+
+    private ViewPager _viewPager;
+
+    private void handleTasksLoaded(List<TaskList> result) {
         G.getState().setTaskLists(result);
+        _viewPager.getAdapter().notifyDataSetChanged();
     }
-
-    TaskListFragmentPagerAdapter _pagerAdapter;
-
-    ViewPager _viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +66,12 @@ public class MainActivity extends FragmentActivity {
     @SuppressWarnings("unchecked")
     @Override
     protected void onStop() {
-        new SaveTaskListTask().execute(G.getState().getTaskLists());
+        saveTasks();
         super.onStop();
     }
 
     @SuppressWarnings("unchecked")
-    protected void saveTasks() {
+    private void saveTasks() {
         new SaveTaskListTask().execute(G.getState().getTaskLists());
     }
 

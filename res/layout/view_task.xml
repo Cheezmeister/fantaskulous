@@ -15,12 +15,13 @@
         android:layout_toRightOf="@id/checkComplete"
         android:text="TextView" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/btnPriority"
+        style="none"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:layout_alignBottom="@+id/titleTextView"
+        android:layout_alignParentRight="true"
         android:src="@drawable/ic_priority_medium" />
 
 </RelativeLayout>
