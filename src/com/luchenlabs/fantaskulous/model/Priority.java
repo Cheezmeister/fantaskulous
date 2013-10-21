@@ -1,9 +1,9 @@
 package com.luchenlabs.fantaskulous.model;
 
 public enum Priority {
-    LOWEST,
+    // LOWEST,
     LOW,
     MEDIUM,
     HIGH,
-    HIGHEST,
+    // HIGHEST,
 }

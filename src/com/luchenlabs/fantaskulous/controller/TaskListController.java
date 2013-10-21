@@ -16,7 +16,7 @@ public class TaskListController {
         _taskList = list;
         _tasks = new ArrayList<TaskController>(list.getTasks().size());
         for (Task task : list.getTasks()) {
-            _tasks.add(new TaskController(this, task));
+            _tasks.add(new TaskController(task, this));
         }
     }
 

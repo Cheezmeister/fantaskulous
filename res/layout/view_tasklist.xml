@@ -17,7 +17,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:ems="10"
-        android:hint="@string/hint_new_task" >
+        android:hint="@string/hint_new_task"
+        android:singleLine="true" >
 
         <requestFocus />
     </EditText>

@@ -9,7 +9,12 @@ public class TaskController {
 
     private final TaskListController _parent;
 
-    public TaskController(TaskListController parent, Task item) {
+    public TaskController(Task item) {
+        _task = item;
+        _parent = null;
+    }
+
+    public TaskController(Task item, TaskListController parent) {
         _task = item;
         _parent = parent;
     }

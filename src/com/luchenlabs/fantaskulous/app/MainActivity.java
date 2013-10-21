@@ -1,9 +1,11 @@
 package com.luchenlabs.fantaskulous.app;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,9 +31,10 @@ public class MainActivity extends FragmentActivity {
 
     private ViewPager _viewPager;
 
-    private void handleTasksLoaded(List<TaskList> result) {
-        G.getState().setTaskLists(result);
-        _viewPager.getAdapter().notifyDataSetChanged();
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
     }
 
     @Override
@@ -44,18 +47,27 @@ public class MainActivity extends FragmentActivity {
         _pagerAdapter = new TaskListFragmentPagerAdapter(
                 getSupportFragmentManager());
 
+        try {
+            FileOutputStream os = openFileOutput("test.txt", MODE_PRIVATE);
+            OutputStreamWriter sw = new OutputStreamWriter(os);
+            sw.append("forks");
+            sw.flush();
+            sw.close();
+            os.close();
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
         // Set up the ViewPager with the sections adapter.
         _viewPager = (ViewPager) findViewById(R.id.pager);
         _viewPager.setAdapter(_pagerAdapter);
 
         new LoadTaskListTask().execute();
 
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
     }
 
     /*
@@ -68,6 +80,11 @@ public class MainActivity extends FragmentActivity {
     protected void onStop() {
         saveTasks();
         super.onStop();
+    }
+
+    private void handleTasksLoaded(List<TaskList> result) {
+        G.getState().setTaskLists(result);
+        _viewPager.getAdapter().notifyDataSetChanged();
     }
 
     @SuppressWarnings("unchecked")
@@ -107,9 +124,9 @@ public class MainActivity extends FragmentActivity {
                     try {
                         lists = JsonPersister.load(is);
                     } catch (JsonParseException e) {
-                        Log.e(getClass().getSimpleName(), getString(R.string.fmt_invalid_json, filename));
+                        Log.wtf(getClass().getSimpleName(), getString(R.string.fmt_invalid_json, filename));
                     } catch (Exception e) {
-                        Log.e(getClass().getSimpleName(), getString(R.string.fmt_invalid_json, filename));
+                        Log.wtf(getClass().getSimpleName(), getString(R.string.fmt_invalid_json, filename));
                     }
                 }
             }
@@ -150,8 +167,11 @@ public class MainActivity extends FragmentActivity {
 
             try {
                 JsonPersister.save(os, lists);
+                os.close();
             } catch (IOException e) {
                 Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
+            } catch (Exception e) {
+                Log.wtf(getClass().getSimpleName(), String.format("Unexpected exception %s", e.toString()));
             }
             return null;
         }

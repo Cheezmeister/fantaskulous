@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ListView;
 
-import com.luchenlabs.fantaskulous.controller.TaskListController;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
 public class TaskListListView extends ListView {
@@ -17,10 +16,6 @@ public class TaskListListView extends ListView {
 
     public TaskListListView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-    }
-
-    public TaskListController getController() {
-        return ((TaskArrayAdapter) getAdapter()).getController();
     }
 
 }

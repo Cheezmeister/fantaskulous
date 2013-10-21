@@ -12,12 +12,16 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
 import com.luchenlabs.fantaskulous.R;
+import com.luchenlabs.fantaskulous.controller.TaskListController;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
@@ -28,6 +32,7 @@ import com.luchenlabs.fantaskulous.model.TaskList;
 public class TaskListView extends RelativeLayout implements Observer {
 
     private TaskList _taskList;
+    private TaskListController _controller;
 
     public TaskListView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -39,27 +44,49 @@ public class TaskListView extends RelativeLayout implements Observer {
         init(context);
     }
 
-    private void hookListeners() {
-        final TaskListListView taskListView = (TaskListListView) findViewById(R.id.taskListListView);
+    public void setTaskList(TaskList taskList) {
+        if (_taskList != null) {
+            _taskList.deleteObserver(this);
+        }
+        _taskList = taskList;
+        _controller = new TaskListController(_taskList);
+        _taskList.addObserver(this);
+        // hookListeners();
 
-        final EditText fieldDescription = (EditText) findViewById(R.id.fieldDesc);
+        TaskArrayAdapter adapter = new TaskArrayAdapter(getContext(), R.layout.view_task, 0, taskList);
 
-        fieldDescription.setOnEditorActionListener(new OnEditorActionListener() {
+        final TaskListListView listView = (TaskListListView) findViewById(R.id.taskListListView);
+        listView.setAdapter(adapter);
+        listView.setOnItemClickListener(new OnItemClickListener() {
+
             @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (event != null) {
-                    taskListView.getController().addTask(fieldDescription.getText());
-                }
-                return false;
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // TODO What do we do here, mmm? Drill into task, methinks.
             }
         });
-
     }
 
-    private void init(Context context) {
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+    @Override
+    public void update(Observable arg0, Object arg1) {
+        if (_taskList != arg0)
+            return;
 
-        inflater.inflate(R.layout.view_tasklist, this, true);
+        // TODO abstract sorting
+        Comparator<Task> comparator = new Comparator<Task>() {
+            @Override
+            public int compare(Task lhs, Task rhs) {
+                int priComp = lhs.getPriority().compareTo(rhs.getPriority());
+                if (priComp != 0)
+                    return priComp;
+                return lhs.getDate().compareTo(rhs.getDate());
+            }
+
+        };
+        Collections.sort(_taskList.getTasks(), comparator);
+    }
+
+    protected TaskListController getController() {
+        return _controller;
     }
 
     /*
@@ -73,33 +100,28 @@ public class TaskListView extends RelativeLayout implements Observer {
         hookListeners();
     }
 
-    public void setTaskList(TaskList taskList) {
-        if (_taskList != null) {
-            _taskList.deleteObserver(this);
-        }
-        _taskList = taskList;
-        _taskList.addObserver(this);
-        // hookListeners();
+    private void hookListeners() {
+        final TaskListListView taskListView = (TaskListListView) findViewById(R.id.taskListListView);
 
-        TaskArrayAdapter adapter = new TaskArrayAdapter(getContext(), R.layout.view_task, 0, taskList);
+        final EditText fieldDescription = (EditText) findViewById(R.id.fieldDesc);
 
-        final TaskListListView listView = (TaskListListView) findViewById(R.id.taskListListView);
-        listView.setAdapter(adapter);
+        fieldDescription.setOnEditorActionListener(new OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (event != null) {
+                    getController().addTask(fieldDescription.getText());
+                    fieldDescription.clearComposingText();
+                }
+                return false;
+            }
+        });
 
     }
 
-    @Override
-    public void update(Observable arg0, Object arg1) {
-        if (_taskList != arg0)
-            return;
-        Comparator<Task> comparator = new Comparator<Task>() {
-            @Override
-            public int compare(Task lhs, Task rhs) {
-                return lhs.getPriority().compareTo(rhs.getPriority());
-            }
+    private void init(Context context) {
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        };
-        Collections.sort(_taskList.getTasks(), comparator);
+        inflater.inflate(R.layout.view_tasklist, this, true);
     }
 
 }

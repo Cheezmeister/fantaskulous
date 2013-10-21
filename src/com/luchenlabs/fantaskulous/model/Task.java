@@ -18,11 +18,15 @@ public class Task extends Observable {
     private CharSequence notes;
     @Expose
     private DateTime date;
+    @Expose
+    private boolean completed;
+    @Expose
+    private DateTime dateOfCompletion;
 
     @Expose
     private UUID guid;
 
-    // public List<Task> blockingTasks; // TODO
+    // public transient List<Task> blockingTasks; // TODO
 
     private transient TaskList parent;
 
@@ -34,14 +38,6 @@ public class Task extends Observable {
         defaults();
         this.parent = parent;
         this.setDescription(description);
-    }
-
-    private void defaults() {
-        setDescription(C.EMPTY);
-        setNotes(null);
-        guid = UUID.randomUUID();
-        setDate(DateTime.now());
-        setPriority(Priority.MEDIUM);
     }
 
     public DateTime getDate() {
@@ -58,6 +54,11 @@ public class Task extends Observable {
 
     public Priority getPriority() {
         return priority;
+    }
+
+    public void setComplete(boolean isComplete) {
+        this.completed = isComplete;
+        this.dateOfCompletion = isComplete ? DateTime.now() : null;
     }
 
     public void setDate(DateTime date) {
@@ -82,6 +83,14 @@ public class Task extends Observable {
         this.priority = priority;
         setChanged();
         notifyObservers();
+    }
+
+    private void defaults() {
+        setDescription(C.EMPTY);
+        setNotes(null);
+        guid = UUID.randomUUID();
+        setDate(DateTime.now());
+        setPriority(Priority.MEDIUM);
     }
 
 }
