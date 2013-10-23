@@ -6,19 +6,7 @@
         {
           description : 'milk'
         }, {
-          description : 'fish'
-        }, {
           description : 'butter'
-        }, {
-          description : 'cereal'
-        }, {
-          description : 'bread'
-        }, {
-          description : 'oil'
-        }, {
-          description : 'flour'
-        }, {
-          description : 'chicken'
         }, {
           description : 'eggs'
         }

@@ -13,5 +13,6 @@
     <string name="fmt_access_denied">Couldn\'t open %1$s for writing. The exception thrown was $2$s</string>
     <string name="fmt_invalid_json">%1$s is corrupt!</string>
     <string name="hint_new_task">New task...</string>
+    <string name="fmt_the_exception_thrown_was">"The exception thrown was %1$s"</string>
 
 </resources>

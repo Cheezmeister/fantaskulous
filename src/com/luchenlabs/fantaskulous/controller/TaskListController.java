@@ -2,6 +2,7 @@ package com.luchenlabs.fantaskulous.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
@@ -16,12 +17,14 @@ public class TaskListController {
         _taskList = list;
         _tasks = new ArrayList<TaskController>(list.getTasks().size());
         for (Task task : list.getTasks()) {
-            _tasks.add(new TaskController(task, this));
+            TaskController controller = new TaskController(task, this);
+            _tasks.add(controller);
         }
     }
 
-    public void addTask(CharSequence description) {
+    public Observable addTask(CharSequence description) {
         Task task = new Task(_taskList, description.toString());
         _taskList.addTask(task);
+        return task;
     }
 }

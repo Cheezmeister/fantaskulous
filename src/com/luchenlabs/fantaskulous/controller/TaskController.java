@@ -19,6 +19,10 @@ public class TaskController {
         _parent = parent;
     }
 
+    public void complete(boolean isChecked) {
+        _task.setComplete(isChecked);
+    }
+
     public void cyclePriority() {
         Priority priority = _task.getPriority();
         int newPriority = priority.ordinal() + 1;

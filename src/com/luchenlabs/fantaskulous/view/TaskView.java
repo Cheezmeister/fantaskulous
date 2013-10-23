@@ -6,6 +6,9 @@ import java.util.Observer;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -30,6 +33,17 @@ public class TaskView extends RelativeLayout implements Observer {
 
     }
 
+    public void refresh() {
+        ImageView btnPriority = (ImageView) findViewById(R.id.btnPriority);
+        TextView textView = (TextView) findViewById(R.id.titleTextView);
+        CheckBox checkComplete = (CheckBox) findViewById(R.id.checkComplete);
+
+        String description = _task.getDescription();
+        btnPriority.setImageResource(iconForPriority(_task.getPriority()));
+        textView.setText(description);
+        checkComplete.setChecked(_task.isComplete());
+    }
+
     @Override
     public void update(Observable observable, Object data) {
         if (_task != observable)
@@ -48,25 +62,28 @@ public class TaskView extends RelativeLayout implements Observer {
         super.onFinishInflate();
     }
 
-    private void init() {
-        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.view_task, this, true);
+    private void hookListeners() {
         findViewById(R.id.btnPriority).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 _controller.cyclePriority();
             }
         });
-        refresh();
+        ((CompoundButton) findViewById(R.id.checkComplete)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                _controller.complete(isChecked);
+            }
+
+        });
     }
 
-    private void refresh() {
-        ImageView btnPriority = (ImageView) findViewById(R.id.btnPriority);
-        TextView textView = (TextView) findViewById(R.id.titleTextView);
-
-        String description = _task.getDescription();
-        textView.setText(description);
-        btnPriority.setImageResource(iconForPriority(_task.getPriority()));
+    private void init() {
+        LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        inflater.inflate(R.layout.view_task, this, true);
+        hookListeners();
+        refresh();
     }
 
     private static int iconForPriority(Priority priority) {

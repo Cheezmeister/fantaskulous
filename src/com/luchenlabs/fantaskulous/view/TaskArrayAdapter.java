@@ -24,6 +24,10 @@ public class TaskArrayAdapter extends ArrayAdapter<Task> implements ListAdapter,
         taskList.addObserver(this);
     }
 
+    public void doUpdate() {
+        notifyDataSetChanged();
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -43,7 +47,7 @@ public class TaskArrayAdapter extends ArrayAdapter<Task> implements ListAdapter,
      */
     @Override
     public void update(Observable observable, Object data) {
-        notifyDataSetChanged();
+        doUpdate();
     }
 
 }

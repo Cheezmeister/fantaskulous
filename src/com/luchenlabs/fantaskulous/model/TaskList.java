@@ -2,11 +2,12 @@ package com.luchenlabs.fantaskulous.model;
 
 import java.util.ArrayList;
 import java.util.Observable;
+import java.util.Observer;
 
 import com.google.gson.annotations.Expose;
 import com.luchenlabs.fantaskulous.C;
 
-public class TaskList extends Observable {
+public class TaskList extends Observable implements Observer {
 
     @Expose
     private String name;
@@ -24,12 +25,9 @@ public class TaskList extends Observable {
 
     public void addTask(Task task) {
         tasks.add(task);
+        task.addObserver(this);
         setChanged();
         notifyObservers();
-    }
-
-    private void defaults() {
-        setName(C.EMPTY);
     }
 
     public String getName() {
@@ -50,5 +48,20 @@ public class TaskList extends Observable {
         this.tasks = tasks;
         setChanged();
         notifyObservers();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
+     */
+    @Override
+    public void update(Observable observable, Object data) {
+        setChanged();
+        notifyObservers();
+    }
+
+    private void defaults() {
+        setName(C.EMPTY);
     }
 }

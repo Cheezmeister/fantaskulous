@@ -29,6 +29,8 @@ public class JsonPersister {
         InputStreamReader reader = new InputStreamReader(is);
         Gson gson = new Gson();
         TaskLists lol = gson.fromJson(reader, TaskLists.class);
+        if (lol == null)
+            return null;
         return lol.lists;
     }
 
