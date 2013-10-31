@@ -46,6 +46,10 @@ public class Task extends Observable {
         return description;
     }
 
+    public UUID getGUID() {
+        return guid;
+    }
+
     public CharSequence getNotes() {
         return notes;
     }

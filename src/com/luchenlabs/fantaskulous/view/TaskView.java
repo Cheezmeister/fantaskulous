@@ -24,11 +24,11 @@ public class TaskView extends RelativeLayout implements Observer {
 
     private final TaskController _controller;
 
-    public TaskView(Context context, Task task) {
+    public TaskView(Context context, Task task, TaskController controller) {
         super(context);
         _task = task;
         _task.addObserver(this);
-        _controller = new TaskController(_task);
+        _controller = controller;
         init();
 
     }

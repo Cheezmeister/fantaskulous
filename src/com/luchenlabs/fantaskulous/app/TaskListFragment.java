@@ -15,6 +15,8 @@ public class TaskListFragment extends Fragment {
 
     public static final String ARG_TASKLIST = "tasklist"; //$NON-NLS-1$
 
+    public static final String ARG_IS_NEW = "isnew"; //$NON-NLS-1$
+
     private int _position;
 
     // // TODO

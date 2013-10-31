@@ -63,5 +63,6 @@ public class TaskList extends Observable implements Observer {
 
     private void defaults() {
         setName(C.EMPTY);
+        setTasks(new ArrayList<Task>());
     }
 }

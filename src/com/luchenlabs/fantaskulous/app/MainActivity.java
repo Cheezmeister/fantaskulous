@@ -10,10 +10,10 @@ import java.util.List;
 import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import com.google.gson.JsonParseException;
@@ -21,10 +21,11 @@ import com.luchenlabs.fantaskulous.C;
 import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.JsonPersister;
 import com.luchenlabs.fantaskulous.R;
+import com.luchenlabs.fantaskulous.controller.MainController;
 import com.luchenlabs.fantaskulous.model.TaskList;
 import com.luchenlabs.fantaskulous.view.TaskListFragmentPagerAdapter;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends AbstractActivity {
 
     private TaskListFragmentPagerAdapter _pagerAdapter;
 
@@ -32,27 +33,51 @@ public class MainActivity extends FragmentActivity {
 
     private View _spinner;
 
+    private MainController _controller;
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see android.support.v4.app.FragmentActivity#onMenuItemSelected(int,
+     * android.view.MenuItem)
+     */
+    @Override
+    public boolean onMenuItemSelected(int featureId, MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_create:
+                createList();
+                break;
+            case R.id.action_remove:
+                removeList();
+                break;
+        }
+        return super.onMenuItemSelected(featureId, item);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        _spinner = findViewById(R.id.spinner);
+        _viewPager = (ViewPager) findViewById(R.id.pager);
 
         _pagerAdapter = new TaskListFragmentPagerAdapter(
                 getSupportFragmentManager());
 
-        _viewPager = (ViewPager) findViewById(R.id.pager);
         _viewPager.setAdapter(_pagerAdapter);
 
-        if (G.getState().getTaskLists() == null) {
+        List<TaskList> taskLists = G.getState().getTaskLists();
+        if (taskLists == null) {
             new LoadTaskListTask().execute();
+        } else {
+            finishOnCreate(taskLists);
         }
-        _spinner = findViewById(R.id.spinner);
     }
 
     /*
@@ -60,22 +85,42 @@ public class MainActivity extends FragmentActivity {
      * 
      * @see android.support.v4.app.FragmentActivity#onStop()
      */
-    @SuppressWarnings("unchecked")
     @Override
     protected void onStop() {
         saveTasks();
         super.onStop();
     }
 
-    private String ex(Exception e, int resId, Object... args) {
-        return getString(resId, args) + "\n" //$NON-NLS-1$
-                + getString(R.string.fmt_the_exception_thrown_was, e.toString());
+    private void createList() {
+        showTextInputDialog(getString(R.string.new_list), getString(R.string.list_name), new StringRunnable() {
+            @Override
+            public void run(String string) {
+                TaskList list = _controller.createTaskList(string);
+                if (list != null) {
+                    _pagerAdapter.presentNewList(list);
+                    _viewPager.refreshDrawableState();
+                }
+            }
+        });
+    }
+
+    private void finishOnCreate(List<TaskList> result) {
+        _controller = new MainController(result);
+        _spinner.setVisibility(View.GONE);
+        _viewPager.getAdapter().notifyDataSetChanged();
     }
 
     private void handleTasksLoaded(List<TaskList> result) {
         G.getState().setTaskLists(result);
-        _spinner.setVisibility(View.GONE);
-        _viewPager.getAdapter().notifyDataSetChanged();
+        finishOnCreate(result);
+    }
+
+    private void removeList() {
+        int position = _viewPager.getCurrentItem();
+        CharSequence name = _pagerAdapter.getPageTitle(position);
+        _controller.removeTaskList(name);
+        _pagerAdapter.refresh(); // TODO register observer
+        _viewPager.setAdapter(_pagerAdapter);
     }
 
     @SuppressWarnings("unchecked")

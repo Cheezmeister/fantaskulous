@@ -61,7 +61,7 @@ public class TaskListView extends RelativeLayout implements Observer {
         }
         // hookListeners();
 
-        TaskArrayAdapter adapter = new TaskArrayAdapter(getContext(), R.layout.view_task, 0, taskList);
+        TaskArrayAdapter adapter = new TaskArrayAdapter(getContext(), taskList, _controller);
 
         _listView = (TaskListListView) findViewById(R.id.taskListListView);
         _listView.setAdapter(adapter);
@@ -93,7 +93,7 @@ public class TaskListView extends RelativeLayout implements Observer {
 
         };
         Collections.sort(_taskList.getTasks(), comparator);
-        ((TaskArrayAdapter) _listView.getAdapter()).doUpdate();
+        ((TaskArrayAdapter) _listView.getAdapter()).refresh();
     }
 
     protected TaskListController getController() {
