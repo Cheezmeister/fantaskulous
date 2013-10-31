@@ -4,11 +4,8 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ListView;
 
-import com.luchenlabs.fantaskulous.model.TaskList;
-
+// TODO baleet?
 public class TaskListListView extends ListView {
-
-    private TaskList _taskList;
 
     public TaskListListView(Context context, AttributeSet attrs) {
         super(context, attrs);

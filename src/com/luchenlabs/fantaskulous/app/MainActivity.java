@@ -211,7 +211,7 @@ public class MainActivity extends AbstractActivity {
             } catch (IOException e) {
                 Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
             } catch (Exception e) {
-                Log.wtf(getClass().getSimpleName(), String.format("Unexpected exception %s", e.toString()));
+                Log.wtf(getClass().getSimpleName(), String.format("Unexpected exception %s", e.toString())); //$NON-NLS-1$
             }
             return null;
         }

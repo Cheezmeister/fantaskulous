@@ -19,10 +19,10 @@ import com.luchenlabs.fantaskulous.model.TaskList;
  * @author cheezmeister
  * 
  */
+@SuppressWarnings("nls")
 public class TaskListTest {
 
     private TaskList list;
-    private TaskController controller;
     private TaskListController parent;
 
     /**
