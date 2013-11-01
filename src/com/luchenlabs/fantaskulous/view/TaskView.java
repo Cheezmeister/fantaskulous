@@ -3,6 +3,8 @@ package com.luchenlabs.fantaskulous.view;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.junit.Assert;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,10 +26,18 @@ public class TaskView extends RelativeLayout implements Observer {
 
     private final TaskController _controller;
 
+    public TaskView(Context context) {
+        super(context);
+        _task = null;
+        _controller = null;
+        Assert.fail("Is this call valid?");
+        init();
+
+    }
+
     public TaskView(Context context, Task task, TaskController controller) {
         super(context);
         _task = task;
-        _task.addObserver(this);
         _controller = controller;
         init();
 
@@ -40,6 +50,7 @@ public class TaskView extends RelativeLayout implements Observer {
 
         String description = _task.getDescription();
         btnPriority.setImageResource(iconForPriority(_task.getPriority()));
+        btnPriority.setContentDescription(_task.getPriority().toString());
         textView.setText(description);
         checkComplete.setChecked(_task.isComplete());
     }
@@ -50,6 +61,32 @@ public class TaskView extends RelativeLayout implements Observer {
             return;
         refresh();
 
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see android.view.View#onAttachedToWindow()
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        if (_task != null) {
+            _task.addObserver(this);
+        }
+        super.onAttachedToWindow();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see android.view.View#onDetachedFromWindow()
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        if (_task != null) {
+            _task.deleteObserver(this);
+        }
+        super.onDetachedFromWindow();
     }
 
     /*

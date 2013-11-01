@@ -96,6 +96,17 @@ public class TaskListView extends RelativeLayout implements Observer {
         ((TaskArrayAdapter) _listView.getAdapter()).refresh();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#finalize()
+     */
+    @Override
+    protected void finalize() throws Throwable {
+        // TODO Auto-generated method stub
+        super.finalize();
+    }
+
     protected TaskListController getController() {
         return _controller;
     }
@@ -107,13 +118,17 @@ public class TaskListView extends RelativeLayout implements Observer {
      */
     @Override
     protected void onDetachedFromWindow() {
+        unobserve();
+        super.onDetachedFromWindow();
+    }
+
+    private void unobserve() {
         if (_taskList != null) {
             _taskList.deleteObserver(this);
             for (Task task : _taskList.getTasks()) {
                 task.deleteObserver(this);
             }
         }
-        super.onDetachedFromWindow();
     }
 
     /*
