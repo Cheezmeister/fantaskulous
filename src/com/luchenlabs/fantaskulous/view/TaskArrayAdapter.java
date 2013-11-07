@@ -32,7 +32,9 @@ public class TaskArrayAdapter extends ArrayAdapter<Task> implements ListAdapter,
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         final Task item = getItem(position);
-        return new TaskView(getContext(), item, _controller.getChild(item.getGUID()));
+        TaskView taskView = new TaskView(getContext(), item, _controller.getChild(item.getGUID()));
+        taskView.setLongClickable(true);
+        return taskView;
     }
 
     public void refresh() {

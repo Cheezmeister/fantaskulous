@@ -12,7 +12,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 
@@ -24,6 +27,7 @@ import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.controller.MainController;
 import com.luchenlabs.fantaskulous.model.TaskList;
 import com.luchenlabs.fantaskulous.view.TaskListFragmentPagerAdapter;
+import com.luchenlabs.fantaskulous.view.TaskView;
 
 public class MainActivity extends AbstractActivity {
 
@@ -34,6 +38,36 @@ public class MainActivity extends AbstractActivity {
     private View _spinner;
 
     private MainController _controller;
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see android.app.Activity#onContextItemSelected(android.view.MenuItem)
+     */
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_move_to_list:
+                // TODO this
+        }
+        return super.onContextItemSelected(item);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see android.app.Activity#onCreateContextMenu(android.view.ContextMenu,
+     * android.view.View, android.view.ContextMenu.ContextMenuInfo)
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater mi = new MenuInflater(this);
+        if (v instanceof TaskView) {
+            mi.inflate(R.menu.context_task, menu);
+            menu.add("stuff");
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -108,6 +142,16 @@ public class MainActivity extends AbstractActivity {
         _controller = new MainController(result);
         _spinner.setVisibility(View.GONE);
         _viewPager.getAdapter().notifyDataSetChanged();
+        // ((ListView)
+        // findViewById(R.id.taskListListView)).setOnItemLongClickListener(new
+        // OnItemLongClickListener() {
+        // @Override
+        // public boolean onItemLongClick(AdapterView<?> parent, View view, int
+        // position, long id) {
+        // registerForContextMenu(view);
+        // return false;
+        // }
+        // });
     }
 
     private void handleTasksLoaded(List<TaskList> result) {

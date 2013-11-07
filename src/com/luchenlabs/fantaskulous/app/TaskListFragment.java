@@ -1,5 +1,7 @@
 package com.luchenlabs.fantaskulous.app;
 
+import java.util.List;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -19,17 +21,6 @@ public class TaskListFragment extends Fragment {
 
     private int _position;
 
-    // // TODO
-    // private void editTask(Task task) {
-    // android.support.v4.app.FragmentTransaction ft = getFragmentManager()
-    // .beginTransaction();
-    // EditTaskFragment editTaskFragment = new EditTaskFragment();
-    // Bundle args = new Bundle();
-    // editTaskFragment.setArguments(args);
-    // ft.add(editTaskFragment, "newTask");
-    // ft.commit();
-    // }
-
     /*
      * (non-Javadoc)
      * 
@@ -40,10 +31,12 @@ public class TaskListFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         this._position = getArguments().getInt(ARG_TASKLIST);
         View v = inflater.inflate(R.layout.fragment_tasklist, null);
-        TaskList taskList = G.getState().getTaskLists().get(_position);
         final TaskListView taskListView = (TaskListView) v.findViewById(R.id.taskListView);
-        taskListView.setTaskList(taskList);
 
+        List<TaskList> taskLists = G.getState().getTaskLists();
+        if (taskLists != null) {
+            taskListView.setTaskList(taskLists.get(_position));
+        }
         return v;
     }
 

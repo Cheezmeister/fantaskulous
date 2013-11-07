@@ -8,12 +8,14 @@ import java.util.Comparator;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.EditText;
@@ -64,12 +66,16 @@ public class TaskListView extends RelativeLayout implements Observer {
         TaskArrayAdapter adapter = new TaskArrayAdapter(getContext(), taskList, _controller);
 
         _listView = (TaskListListView) findViewById(R.id.taskListListView);
+        _listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         _listView.setAdapter(adapter);
         _listView.setOnItemClickListener(new OnItemClickListener() {
 
+            @SuppressLint("ResourceAsColor")
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // TODO What do we do here, mmm? Drill into task, methinks.
+                boolean checked = !_listView.isItemChecked(position);
+                view.setBackgroundColor(android.R.color.holo_green_dark);
+                _listView.setItemChecked(position, checked);
             }
         });
     }
@@ -120,15 +126,6 @@ public class TaskListView extends RelativeLayout implements Observer {
     protected void onDetachedFromWindow() {
         unobserve();
         super.onDetachedFromWindow();
-    }
-
-    private void unobserve() {
-        if (_taskList != null) {
-            _taskList.deleteObserver(this);
-            for (Task task : _taskList.getTasks()) {
-                task.deleteObserver(this);
-            }
-        }
     }
 
     /*
@@ -192,6 +189,15 @@ public class TaskListView extends RelativeLayout implements Observer {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         inflater.inflate(R.layout.view_tasklist, this, true);
+    }
+
+    private void unobserve() {
+        if (_taskList != null) {
+            _taskList.deleteObserver(this);
+            for (Task task : _taskList.getTasks()) {
+                task.deleteObserver(this);
+            }
+        }
     }
 
 }
