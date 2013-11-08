@@ -126,16 +126,19 @@ public class MainActivity extends AbstractActivity {
     }
 
     private void createList() {
-        showTextInputDialog(getString(R.string.new_list), getString(R.string.list_name), new StringRunnable() {
-            @Override
-            public void run(String string) {
-                TaskList list = _controller.createTaskList(string);
-                if (list != null) {
-                    _pagerAdapter.presentNewList(list);
-                    _viewPager.refreshDrawableState();
-                }
-            }
-        });
+        showTextInputDialog(
+                getString(R.string.new_list),
+                getString(R.string.list_name),
+                new StringRunnable() {
+                    @Override
+                    public void run(String string) {
+                        TaskList list = _controller.createTaskList(string);
+                        if (list != null) {
+                            _pagerAdapter.presentNewList(list);
+                            _viewPager.refreshDrawableState();
+                        }
+                    }
+                });
     }
 
     private void finishOnCreate(List<TaskList> result) {

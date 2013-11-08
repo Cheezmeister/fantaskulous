@@ -1,5 +1,6 @@
 package com.luchenlabs.fantaskulous.controller;
 
+import com.luchenlabs.fantaskulous.C;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
 
@@ -12,6 +13,10 @@ public class TaskController {
     public TaskController(Task item, TaskListController parent) {
         _task = item;
         _parent = parent;
+    }
+
+    public void changeDescription(String description) {
+        _task.setDescription(description == null ? C.EMPTY : description);
     }
 
     public void complete(boolean isChecked) {

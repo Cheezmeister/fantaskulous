@@ -42,7 +42,12 @@ public class EverythingTest {
     @Test
     public final void testRemoveTaskList() {
         controller.createTaskList(NAME);
+        assertEquals(taskLists.size(), 1);
+
         assertTrue(controller.removeTaskList(NAME));
+        assertEquals(taskLists.size(), 0);
+
+        assertFalse(controller.removeTaskList(NAME));
         assertEquals(taskLists.size(), 0);
     }
 

@@ -20,8 +20,8 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.google.gson.annotations.Expose;
 import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fantaskulous.model.TaskLists;
 
 public class JsonPersister {
 
@@ -59,10 +59,5 @@ public class JsonPersister {
         public JsonElement serialize(DateTime src, Type srcType, JsonSerializationContext context) {
             return new JsonPrimitive(src.toString());
         }
-    }
-
-    private static class TaskLists {
-        @Expose
-        public ArrayList<TaskList> lists = new ArrayList<TaskList>();
     }
 }
