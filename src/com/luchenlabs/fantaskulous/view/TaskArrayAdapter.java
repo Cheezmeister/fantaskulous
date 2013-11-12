@@ -15,6 +15,8 @@ import com.luchenlabs.fantaskulous.model.TaskList;
 
 public class TaskArrayAdapter extends ArrayAdapter<Task> implements ListAdapter, Observer {
 
+    @Deprecated
+    // TODO
     private final TaskListController _controller;
 
     public TaskArrayAdapter(Context context, TaskList taskList, TaskListController controller) {
@@ -32,7 +34,12 @@ public class TaskArrayAdapter extends ArrayAdapter<Task> implements ListAdapter,
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
         final Task item = getItem(position);
-        TaskView taskView = new TaskView(getContext(), item, _controller.getChild(item.getGUID()));
+        TaskView taskView = (TaskView) convertView;
+        if (taskView == null) {
+            taskView = new TaskView(getContext(), item, _controller.getChild(item.getGUID()));
+        } else {
+            taskView.setModel(item);
+        }
         taskView.setLongClickable(true);
         return taskView;
     }

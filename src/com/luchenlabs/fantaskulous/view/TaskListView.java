@@ -32,7 +32,7 @@ import com.luchenlabs.fantaskulous.model.TaskList;
  * @author cheezmeister
  * 
  */
-public class TaskListView extends RelativeLayout implements Observer {
+public class TaskListView extends RelativeLayout implements Observer, FView<TaskList> {
 
     private TaskList _taskList;
     private TaskListController _controller;
@@ -51,23 +51,29 @@ public class TaskListView extends RelativeLayout implements Observer {
         init(context);
     }
 
-    public void setTaskList(TaskList taskList) {
+    @Override
+    public void refresh() {
+        TaskArrayAdapter adapter = (TaskArrayAdapter) _listView.getAdapter();
+        if (adapter == null) {
+            adapter = new TaskArrayAdapter(getContext(), _taskList, _controller);
+        }
+        _listView.setAdapter(adapter);
+    }
+
+    @Override
+    public void setModel(TaskList model) {
         if (_taskList != null) {
             _taskList.deleteObserver(this);
         }
-        _taskList = taskList;
+        _taskList = model;
         _controller = new TaskListController(_taskList);
         _taskList.addObserver(this);
         for (Task task : _taskList.getTasks()) {
             task.addObserver(this);
         }
-        // hookListeners();
-
-        TaskArrayAdapter adapter = new TaskArrayAdapter(getContext(), taskList, _controller);
 
         _listView = (TaskListListView) findViewById(R.id.taskListListView);
         _listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
-        _listView.setAdapter(adapter);
         _listView.setOnItemClickListener(new OnItemClickListener() {
 
             @SuppressLint("ResourceAsColor")
@@ -78,6 +84,7 @@ public class TaskListView extends RelativeLayout implements Observer {
                 _listView.setItemChecked(position, checked);
             }
         });
+        refresh();
     }
 
     @Override
@@ -147,7 +154,7 @@ public class TaskListView extends RelativeLayout implements Observer {
         fieldDescription.setOnKeyListener(new OnKeyListener() {
 
             @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
+            public boolean onKey(android.view.View v, int keyCode, KeyEvent event) {
                 // if (keyCode == KeyEvent.KEYCODE_ENTER) {
                 // getController().addTask(fieldDescription.getText());
                 // fieldDescription.setText(null);

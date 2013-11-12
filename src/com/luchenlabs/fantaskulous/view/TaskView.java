@@ -24,11 +24,11 @@ import com.luchenlabs.fantaskulous.controller.TaskController;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
 
-public class TaskView extends RelativeLayout implements Observer {
+public class TaskView extends RelativeLayout implements FView<Task>, Observer {
 
-    private final Task _task;
+    private Task _task;
 
-    private final TaskController _controller;
+    private TaskController _controller;
 
     public TaskView(Context context) {
         super(context);
@@ -41,12 +41,11 @@ public class TaskView extends RelativeLayout implements Observer {
 
     public TaskView(Context context, Task task, TaskController controller) {
         super(context);
-        _task = task;
-        _controller = controller;
         init();
-
+        setModel(task);
     }
 
+    @Override
     public void refresh() {
         ImageView btnPriority = (ImageView) findViewById(R.id.btnPriority);
         TextView textView = (TextView) findViewById(R.id.lblDesc);
@@ -59,6 +58,18 @@ public class TaskView extends RelativeLayout implements Observer {
         textView.setText(description);
         fieldDesc.setText(description);
         checkComplete.setChecked(_task.isComplete());
+    }
+
+    @Override
+    public void setModel(Task m) {
+        if (_task == m)
+            return;
+        Task oldTask = _task;
+        _task = m;
+        _controller = new TaskController(m);
+        refresh();
+        if (oldTask == null)
+            hookListeners();
     }
 
     @Override
@@ -133,14 +144,6 @@ public class TaskView extends RelativeLayout implements Observer {
                 return false;
             }
         });
-        fieldDesc.setOnFocusChangeListener(new OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if (!hasFocus) {
-                    setEditModeState(false);
-                }
-            }
-        });
 
         ((CompoundButton) findViewById(R.id.checkComplete)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
@@ -154,12 +157,14 @@ public class TaskView extends RelativeLayout implements Observer {
         LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.view_task, this, true);
         hookListeners();
-        refresh();
     }
 
     private void setEditModeState(boolean editing) {
         findViewById(R.id.lblDesc).setVisibility(editing ? View.GONE : View.VISIBLE);
-        ((EditText) findViewById(R.id.fieldTempDesc)).setVisibility(editing ? View.VISIBLE : View.GONE);
+        EditText editText = (EditText) findViewById(R.id.fieldTempDesc);
+        editText.setVisibility(editing ? View.VISIBLE : View.GONE);
+        if (editing)
+            editText.requestFocus();
     }
 
     private static int iconForPriority(Priority priority) {

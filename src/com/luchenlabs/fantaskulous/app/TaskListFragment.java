@@ -35,7 +35,7 @@ public class TaskListFragment extends Fragment {
 
         List<TaskList> taskLists = G.getState().getTaskLists();
         if (taskLists != null) {
-            taskListView.setTaskList(taskLists.get(_position));
+            taskListView.setModel(taskLists.get(_position));
         }
         return v;
     }

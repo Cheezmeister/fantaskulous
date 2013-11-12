@@ -17,14 +17,14 @@ public class TaskListController {
         _taskList = list;
         _children = new HashMap<UUID, TaskController>();
         for (Task task : list.getTasks()) {
-            TaskController controller = new TaskController(task, this);
+            TaskController controller = new TaskController(task);
             _children.put(task.getGUID(), controller);
         }
     }
 
     public Observable addTask(CharSequence description) {
         Task task = new Task(_taskList, description.toString());
-        TaskController controller = new TaskController(task, this);
+        TaskController controller = new TaskController(task);
         _children.put(task.getGUID(), controller);
         _taskList.addTask(task);
         return task;

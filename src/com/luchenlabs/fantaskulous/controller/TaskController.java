@@ -8,11 +8,8 @@ public class TaskController {
 
     private final Task _task;
 
-    private final TaskListController _parent;
-
-    public TaskController(Task item, TaskListController parent) {
+    public TaskController(Task item) {
         _task = item;
-        _parent = parent;
     }
 
     public void changeDescription(String description) {

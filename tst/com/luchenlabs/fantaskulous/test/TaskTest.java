@@ -22,7 +22,7 @@ public class TaskTest {
     @Before
     public void setUp() throws Exception {
         task = new Task();
-        controller = new TaskController(task, null);
+        controller = new TaskController(task);
     }
 
     @Test
