@@ -5,22 +5,16 @@ import java.util.List;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
 public class MainController {
-    private final List<TaskList> _taskLists;
-
-    public MainController(List<TaskList> taskLists) {
-        this._taskLists = taskLists;
-    }
-
-    public TaskList createTaskList(CharSequence title) {
+    public TaskList createTaskList(List<TaskList> lists, CharSequence title) {
         TaskList list = new TaskList(title.toString());
-        _taskLists.add(list);
+        lists.add(list);
         return list;
     }
 
-    public boolean removeTaskList(CharSequence name) {
-        for (TaskList task : _taskLists) {
+    public boolean removeTaskList(List<TaskList> lists, CharSequence name) {
+        for (TaskList task : lists) {
             if (task.getName().equals(name))
-                return _taskLists.remove(task);
+                return lists.remove(task);
         }
         return false;
     }

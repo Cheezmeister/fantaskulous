@@ -8,9 +8,9 @@ import java.util.Comparator;
 import java.util.Observable;
 import java.util.Observer;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,6 +23,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.controller.TaskListController;
 import com.luchenlabs.fantaskulous.model.Task;
@@ -53,20 +54,25 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
     @Override
     public void refresh() {
+        Log.v(getClass().getSimpleName(), "refresh");
         TaskArrayAdapter adapter = (TaskArrayAdapter) _listView.getAdapter();
         if (adapter == null) {
             adapter = new TaskArrayAdapter(getContext(), _taskList, _controller);
+        } else {
+            adapter.notifyDataSetChanged();
         }
         _listView.setAdapter(adapter);
+        adapter.refresh();
     }
 
     @Override
     public void setModel(TaskList model) {
+        Log.v(getClass().getSimpleName(), "setModel");
         if (_taskList != null) {
             _taskList.deleteObserver(this);
         }
         _taskList = model;
-        _controller = new TaskListController(_taskList);
+        grabController();
         _taskList.addObserver(this);
         for (Task task : _taskList.getTasks()) {
             task.addObserver(this);
@@ -76,11 +82,10 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
         _listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         _listView.setOnItemClickListener(new OnItemClickListener() {
 
-            @SuppressLint("ResourceAsColor")
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 boolean checked = !_listView.isItemChecked(position);
-                view.setBackgroundColor(android.R.color.holo_green_dark);
+                view.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
                 _listView.setItemChecked(position, checked);
             }
         });
@@ -90,7 +95,7 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
     @Override
     public void update(Observable arg0, Object arg1) {
 
-        // TODO abstract sorting
+        // TODO abstract sorting away
         Comparator<Task> comparator = new Comparator<Task>() {
             @Override
             public int compare(Task lhs, Task rhs) {
@@ -107,17 +112,6 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
         };
         Collections.sort(_taskList.getTasks(), comparator);
         ((TaskArrayAdapter) _listView.getAdapter()).refresh();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#finalize()
-     */
-    @Override
-    protected void finalize() throws Throwable {
-        // TODO Auto-generated method stub
-        super.finalize();
     }
 
     protected TaskListController getController() {
@@ -146,19 +140,20 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
         hookListeners();
     }
 
-    private void hookListeners() {
-        final TaskListListView taskListView = (TaskListListView) findViewById(R.id.taskListListView);
+    /**
+     * Grab the global task controller and stash it in a field
+     */
+    private void grabController() {
+        _controller = G.getState().getTaskListController();
+    }
 
+    private void hookListeners() {
         final EditText fieldDescription = (EditText) findViewById(R.id.fieldDesc);
 
         fieldDescription.setOnKeyListener(new OnKeyListener() {
 
             @Override
             public boolean onKey(android.view.View v, int keyCode, KeyEvent event) {
-                // if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                // getController().addTask(fieldDescription.getText());
-                // fieldDescription.setText(null);
-                // }
                 return false;
             }
         });
@@ -171,7 +166,7 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
                 if (actionId == EditorInfo.IME_ACTION_DONE ||
                         (event != null && event.getAction() == KeyEvent.ACTION_DOWN)) {
-                    getController().addTask(text);
+                    getController().addTask(_taskList, text);
                     fieldDescription.clearComposingText();
                     fieldDescription.setText(null);
 

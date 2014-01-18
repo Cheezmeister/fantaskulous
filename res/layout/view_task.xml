@@ -30,9 +30,9 @@
         android:id="@+id/btnPriority"
         style="none"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_priority_medium" />
+        android:src="@drawable/ic_priority_medium_solid" />
 
 </RelativeLayout>

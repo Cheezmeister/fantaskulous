@@ -3,6 +3,7 @@ package com.luchenlabs.fantaskulous.model;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.UUID;
 
 import com.google.gson.annotations.Expose;
 import com.luchenlabs.fantaskulous.C;
@@ -13,6 +14,8 @@ public class TaskList extends Observable implements Observer {
     private String name;
     @Expose
     private ArrayList<Task> tasks;
+    @Expose
+    private UUID guid;
 
     public TaskList() {
         defaults();
@@ -30,12 +33,20 @@ public class TaskList extends Observable implements Observer {
         notifyObservers();
     }
 
+    public UUID getGuid() {
+        return guid;
+    }
+
     public String getName() {
         return name;
     }
 
     public ArrayList<Task> getTasks() {
         return tasks;
+    }
+
+    public void setGuid(UUID guid) {
+        this.guid = guid;
     }
 
     public void setName(String name) {

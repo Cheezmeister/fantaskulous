@@ -23,12 +23,12 @@ public class EverythingTest {
     @Before
     public void setUp() throws Exception {
         taskLists = new ArrayList<TaskList>();
-        controller = new MainController(taskLists);
+        controller = new MainController();
     }
 
     @Test
     public final void testCreateTaskList() {
-        controller.createTaskList(NAME);
+        controller.createTaskList(taskLists, NAME);
         TaskList list = taskLists.get(0);
         assertNotNull(list);
         assertEquals(list.getName(), NAME);
@@ -36,18 +36,24 @@ public class EverythingTest {
 
     @Test
     public final void testRemoveNonexistentTaskList() {
-        assertFalse(controller.removeTaskList("I don't exist")); //$NON-NLS-1$
+        assertFalse(controller.removeTaskList(taskLists, "I don't exist")); //$NON-NLS-1$
     }
 
     @Test
     public final void testRemoveTaskList() {
-        controller.createTaskList(NAME);
+        controller.createTaskList(taskLists, NAME);
         assertEquals(taskLists.size(), 1);
 
-        assertTrue(controller.removeTaskList(NAME));
+        controller.createTaskList(taskLists, NAME);
+        assertEquals(taskLists.size(), 2);
+
+        assertTrue(controller.removeTaskList(taskLists, NAME));
+        assertEquals(taskLists.size(), 1);
+
+        assertTrue(controller.removeTaskList(taskLists, NAME));
         assertEquals(taskLists.size(), 0);
 
-        assertFalse(controller.removeTaskList(NAME));
+        assertFalse(controller.removeTaskList(taskLists, NAME));
         assertEquals(taskLists.size(), 0);
     }
 

@@ -1,6 +1,5 @@
 package com.luchenlabs.fantaskulous.view;
 
-
 public interface FView<T> {
 
     /**
@@ -8,6 +7,11 @@ public interface FView<T> {
      */
     void refresh();
 
+    /**
+     * Assign a model to this view
+     * 
+     * @param model
+     */
     void setModel(T model);
 
 }

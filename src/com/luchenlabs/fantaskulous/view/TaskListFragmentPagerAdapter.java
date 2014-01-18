@@ -8,7 +8,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.util.Log;
-import android.view.ViewGroup;
 
 import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.app.TaskListFragment;
@@ -22,19 +21,6 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
     public TaskListFragmentPagerAdapter(FragmentManager fm) {
         super(fm);
         _fragments = new ArrayList<TaskListFragment>(10);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * android.support.v4.app.FragmentPagerAdapter#finishUpdate(android.view
-     * .ViewGroup)
-     */
-    @Override
-    public void finishUpdate(ViewGroup container) {
-        // ((ViewGroup) container.getParent()).removeView(container);
-        super.finishUpdate(container);
     }
 
     @Override
@@ -85,19 +71,6 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
         return taskList.getName(); // TODO fancy interactive title setting
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see android.support.v4.view.PagerAdapter#notifyDataSetChanged()
-     */
-    @Override
-    public void notifyDataSetChanged() {
-        for (TaskListFragment fragment : _fragments) {
-            ((TaskListView) fragment.getView()).refresh();
-        }
-        super.notifyDataSetChanged();
-    }
-
     /**
      * Open up a new list that the user has created
      * 
@@ -105,10 +78,14 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
      */
     public void presentNewList(TaskList list) {
         _newList = list;
-        notifyDataSetChanged();
+        refresh();
     }
 
     public void refresh() {
+        for (TaskListFragment fragment : _fragments) {
+            Log.v(getClass().getSimpleName(), "refresh " + fragment);
+            fragment.refresh();
+        }
         notifyDataSetChanged();
     }
 }

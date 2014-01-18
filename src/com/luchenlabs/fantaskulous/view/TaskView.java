@@ -3,8 +3,6 @@ package com.luchenlabs.fantaskulous.view;
 import java.util.Observable;
 import java.util.Observer;
 
-import org.junit.Assert;
-
 import android.content.Context;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -19,6 +17,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
 
+import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.controller.TaskController;
 import com.luchenlabs.fantaskulous.model.Priority;
@@ -34,12 +33,11 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
         super(context);
         _task = null;
         _controller = null;
-        Assert.fail("Is this call valid?"); //$NON-NLS-1$
         init();
 
     }
 
-    public TaskView(Context context, Task task, TaskController controller) {
+    public TaskView(Context context, Task task) {
         super(context);
         init();
         setModel(task);
@@ -66,7 +64,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
             return;
         Task oldTask = _task;
         _task = m;
-        _controller = new TaskController(m);
+        grabController();
         refresh();
         if (oldTask == null)
             hookListeners();
@@ -116,6 +114,13 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
         super.onFinishInflate();
     }
 
+    /**
+     * Grab the global task controller and stash it in a field
+     */
+    private void grabController() {
+        _controller = G.getState().getTaskController();
+    }
+
     private void hookListeners() {
         final EditText fieldDesc = (EditText) findViewById(R.id.fieldTempDesc);
         final View lblDesc = findViewById(R.id.lblDesc);
@@ -123,7 +128,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
         findViewById(R.id.btnPriority).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                _controller.cyclePriority();
+                _controller.cyclePriority(_task);
             }
         });
         lblDesc.setOnClickListener(new OnClickListener() {
@@ -138,7 +143,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE ||
                         (event != null && event.getAction() == KeyEvent.ACTION_DOWN)) {
-                    _controller.changeDescription(fieldDesc.getText().toString());
+                    _controller.changeDescription(_task, fieldDesc.getText().toString());
                     setEditModeState(false);
                 }
                 return false;
@@ -148,7 +153,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
         ((CompoundButton) findViewById(R.id.checkComplete)).setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                _controller.complete(isChecked);
+                _controller.complete(_task, isChecked);
             }
         });
     }
@@ -159,6 +164,14 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
         hookListeners();
     }
 
+    /**
+     * Toggle between displaying a {@link TextView} and {@link EditText} to
+     * allow user to edit the title in place.
+     * 
+     * This is kind of hackish.
+     * 
+     * @param editing
+     */
     private void setEditModeState(boolean editing) {
         findViewById(R.id.lblDesc).setVisibility(editing ? View.GONE : View.VISIBLE);
         EditText editText = (EditText) findViewById(R.id.fieldTempDesc);
@@ -167,13 +180,19 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
             editText.requestFocus();
     }
 
+    /**
+     * Simple map from {@link Priority} to drawable
+     * 
+     * @param priority
+     * @return the priority icon if one exists, else 0
+     */
     private static int iconForPriority(Priority priority) {
         switch (priority) {
             case HIGH:
                 // case HIGHEST:
                 return R.drawable.ic_priority_high;
             case MEDIUM:
-                return R.drawable.ic_priority_medium;
+                return R.drawable.ic_priority_medium_solid;
             case LOW:
                 // case LOWEST:
                 return R.drawable.ic_priority_low;

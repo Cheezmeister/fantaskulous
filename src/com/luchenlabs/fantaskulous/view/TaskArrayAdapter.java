@@ -36,7 +36,7 @@ public class TaskArrayAdapter extends ArrayAdapter<Task> implements ListAdapter,
         final Task item = getItem(position);
         TaskView taskView = (TaskView) convertView;
         if (taskView == null) {
-            taskView = new TaskView(getContext(), item, _controller.getChild(item.getGUID()));
+            taskView = new TaskView(getContext(), item);
         } else {
             taskView.setModel(item);
         }

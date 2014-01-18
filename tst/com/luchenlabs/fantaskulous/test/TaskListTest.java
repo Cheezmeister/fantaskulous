@@ -3,14 +3,11 @@
  */
 package com.luchenlabs.fantaskulous.test;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.luchenlabs.fantaskulous.controller.TaskController;
 import com.luchenlabs.fantaskulous.controller.TaskListController;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
@@ -32,7 +29,7 @@ public class TaskListTest {
     public void setUp() throws Exception {
         list = new TaskList("Test list");
         list.addTask(new Task(list, "Test task"));
-        parent = new TaskListController(list);
+        parent = new TaskListController();
 
     }
 
@@ -43,24 +40,8 @@ public class TaskListTest {
      */
     @Test
     public final void testAddTask() {
-        Task t = (Task) parent.addTask("this is a task");
+        Task t = (Task) parent.addTask(list, "this is a task");
         assertNotNull(t);
-        assertNotNull(parent.getChild(t.getGUID()));
-    }
-
-    /**
-     * Test method for
-     * {@link com.luchenlabs.fantaskulous.controller.TaskListController#getChild(java.util.UUID)}
-     * .
-     */
-    @Test
-    public final void testGetChild() {
-        Task task = list.getTasks().get(0);
-        TaskController child = parent.getChild(task.getGUID());
-        assertNotNull(child);
-        assertFalse(task.isComplete());
-        child.complete(true);
-        assertTrue(task.isComplete());
     }
 
     @Test

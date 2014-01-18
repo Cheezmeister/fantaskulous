@@ -74,6 +74,7 @@ public class MainActivity extends AbstractActivity {
 
         List<TaskList> taskLists = G.getState().getTaskLists();
         if (taskLists == null) {
+            _spinner.setVisibility(View.VISIBLE);
             new LoadTaskListTask().execute();
         } else {
             finishOnCreate(taskLists);
@@ -98,7 +99,7 @@ public class MainActivity extends AbstractActivity {
                 new StringRunnable() {
                     @Override
                     public void run(String string) {
-                        TaskList list = _controller.createTaskList(string);
+                        TaskList list = _controller.createTaskList(G.getState().getTaskLists(), string);
                         if (list != null) {
                             _pagerAdapter.presentNewList(list);
                             _viewPager.refreshDrawableState();
@@ -109,17 +110,8 @@ public class MainActivity extends AbstractActivity {
 
     private void finishOnCreate(List<TaskList> result) {
         _spinner.setVisibility(View.GONE);
+        Log.v(getClass().getSimpleName(), "finishOnCreate");
         setTaskLists(result);
-        // ((ListView)
-        // findViewById(R.id.taskListListView)).setOnItemLongClickListener(new
-        // OnItemLongClickListener() {
-        // @Override
-        // public boolean onItemLongClick(AdapterView<?> parent, View view, int
-        // position, long id) {
-        // registerForContextMenu(view);
-        // return false;
-        // }
-        // });
     }
 
     private void handleTasksLoaded(List<TaskList> result) {
@@ -130,7 +122,7 @@ public class MainActivity extends AbstractActivity {
     private void removeList() {
         int position = _viewPager.getCurrentItem();
         CharSequence name = _pagerAdapter.getPageTitle(position);
-        _controller.removeTaskList(name);
+        _controller.removeTaskList(G.getState().getTaskLists(), name);
         _pagerAdapter.refresh(); // TODO register observer
         _viewPager.setAdapter(_pagerAdapter);
     }
@@ -144,8 +136,9 @@ public class MainActivity extends AbstractActivity {
     }
 
     private void setTaskLists(List<TaskList> result) {
-        _controller = new MainController(result);
-        _viewPager.getAdapter().notifyDataSetChanged();
+        _controller = G.getState().getMainController();
+        Log.v(getClass().getSimpleName(), "setTaskLists");
+        _pagerAdapter.refresh();
     }
 
     private class LoadTaskListTask extends AsyncTask<Void, Void, List<TaskList>> {

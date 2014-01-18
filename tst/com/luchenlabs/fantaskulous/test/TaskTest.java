@@ -22,30 +22,30 @@ public class TaskTest {
     @Before
     public void setUp() throws Exception {
         task = new Task();
-        controller = new TaskController(task);
+        controller = new TaskController();
     }
 
     @Test
     public final void testChangeDescription() {
-        controller.changeDescription(TITLE);
+        controller.changeDescription(task, TITLE);
         assertEquals(TITLE, task.getDescription());
-        controller.changeDescription(null);
+        controller.changeDescription(task, null);
         assertEquals(C.EMPTY, task.getDescription());
         String looong = "Some really ungodly abysmally long string that you would never want to type out on a mobile, Some really ungodly abysmally long string that you would never want to type out on a mobile, Some really ungodly abysmally long string that you would never want to type out on a mobile"; //$NON-NLS-1$
-        controller.changeDescription(looong);
+        controller.changeDescription(task, looong);
     }
 
     @Test
     public final void testComplete() {
         assertFalse(task.isComplete());
-        controller.complete(true);
+        controller.complete(task, true);
         assertTrue(task.isComplete());
     }
 
     @Test
     public final void testPriority() {
         Priority old = task.getPriority();
-        controller.cyclePriority();
+        controller.cyclePriority(task);
         assertNotEquals(old, task.getPriority());
     }
 }
