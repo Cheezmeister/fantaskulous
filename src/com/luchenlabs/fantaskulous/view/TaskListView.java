@@ -10,7 +10,6 @@ import java.util.Observer;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +17,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -54,7 +54,6 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
     @Override
     public void refresh() {
-        Log.v(getClass().getSimpleName(), "refresh");
         TaskArrayAdapter adapter = (TaskArrayAdapter) _listView.getAdapter();
         if (adapter == null) {
             adapter = new TaskArrayAdapter(getContext(), _taskList, _controller);
@@ -67,7 +66,6 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
     @Override
     public void setModel(TaskList model) {
-        Log.v(getClass().getSimpleName(), "setModel");
         if (_taskList != null) {
             _taskList.deleteObserver(this);
         }
@@ -84,11 +82,10 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                boolean checked = !_listView.isItemChecked(position);
-                view.setBackgroundColor(getResources().getColor(android.R.color.holo_green_dark));
-                _listView.setItemChecked(position, checked);
+                _listView.setSelection(position);
             }
         });
+        hookListeners();
         refresh();
     }
 
@@ -137,7 +134,6 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        hookListeners();
     }
 
     /**
@@ -182,6 +178,16 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
                     // food. Sans milk :( Oh // well. Tiem to coad
                 }
                 return false;
+            }
+        });
+
+        _listView.setOnItemLongClickListener(new OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Task task = (Task) parent.getItemAtPosition(position);
+                G.getState().getMainController()
+                        .moveTaskToNextList(task, _taskList, G.getState().getTaskLists());
+                return true;
             }
         });
 

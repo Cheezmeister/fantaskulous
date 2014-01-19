@@ -26,15 +26,12 @@ public class Task extends Observable {
     @Expose
     private UUID guid;
 
-    private transient TaskList parent;
-
     public Task() {
         defaults();
     }
 
     public Task(TaskList parent, String description) {
         defaults();
-        this.parent = parent;
         this.setDescription(description);
     }
 

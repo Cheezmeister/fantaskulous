@@ -4,6 +4,7 @@ import com.luchenlabs.fantaskulous.C;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
 
+@SuppressWarnings("static-method")
 public class TaskController {
 
     public void changeDescription(Task task, String description) {

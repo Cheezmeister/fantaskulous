@@ -45,6 +45,15 @@ public class TaskList extends Observable implements Observer {
         return tasks;
     }
 
+    public boolean removeTask(Task task) {
+        boolean modified = tasks.remove(task);
+        if (modified) {
+            setChanged();
+            notifyObservers();
+        }
+        return modified;
+    }
+
     public void setGuid(UUID guid) {
         this.guid = guid;
     }

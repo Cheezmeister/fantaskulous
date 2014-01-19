@@ -5,6 +5,7 @@ import java.util.Observable;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
+@SuppressWarnings("static-method")
 public class TaskListController {
 
     public Observable addTask(TaskList taskList, CharSequence description) {

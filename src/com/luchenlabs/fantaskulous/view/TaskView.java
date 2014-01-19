@@ -192,7 +192,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
                 // case HIGHEST:
                 return R.drawable.ic_priority_high;
             case MEDIUM:
-                return R.drawable.ic_priority_medium_solid;
+                return R.drawable.ic_priority_medium;
             case LOW:
                 // case LOWEST:
                 return R.drawable.ic_priority_low;

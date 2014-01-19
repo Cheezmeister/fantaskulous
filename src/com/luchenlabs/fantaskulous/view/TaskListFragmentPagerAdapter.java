@@ -83,7 +83,6 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
 
     public void refresh() {
         for (TaskListFragment fragment : _fragments) {
-            Log.v(getClass().getSimpleName(), "refresh " + fragment);
             fragment.refresh();
         }
         notifyDataSetChanged();

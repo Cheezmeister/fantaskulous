@@ -29,10 +29,10 @@
     <ImageView
         android:id="@+id/btnPriority"
         style="none"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_priority_medium_solid" />
+        android:src="@drawable/ic_priority_medium" />
 
 </RelativeLayout>

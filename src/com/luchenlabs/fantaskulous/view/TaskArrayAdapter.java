@@ -15,13 +15,8 @@ import com.luchenlabs.fantaskulous.model.TaskList;
 
 public class TaskArrayAdapter extends ArrayAdapter<Task> implements ListAdapter, Observer {
 
-    @Deprecated
-    // TODO
-    private final TaskListController _controller;
-
     public TaskArrayAdapter(Context context, TaskList taskList, TaskListController controller) {
         super(context, 0, taskList.getTasks());
-        this._controller = controller;
         taskList.addObserver(this);
     }
 

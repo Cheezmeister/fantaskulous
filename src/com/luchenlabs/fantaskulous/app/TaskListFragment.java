@@ -4,7 +4,6 @@ import java.util.List;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,15 +37,12 @@ public class TaskListFragment extends Fragment {
     }
 
     public void refresh() {
-        Log.v(getClass().getSimpleName(), "refresh");
         updateTaskListView((TaskListView) getView().findViewById(R.id.taskListView));
     }
 
     public void updateTaskListView(final TaskListView taskListView) {
-        Log.v(getClass().getSimpleName(), "updateTaskListView");
         List<TaskList> taskLists = G.getState().getTaskLists();
         if (taskLists != null) {
-            Log.v(getClass().getSimpleName(), "setting model for " + taskLists);
             taskListView.setModel(taskLists.get(_position));
         }
     }

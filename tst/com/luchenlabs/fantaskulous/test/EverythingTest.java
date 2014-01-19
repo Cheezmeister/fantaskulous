@@ -12,17 +12,22 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.luchenlabs.fantaskulous.controller.MainController;
+import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fantaskulous.model.TaskLists;
 
 public class EverythingTest {
 
     private static final String NAME = "Empty"; //$NON-NLS-1$
     private MainController controller;
     private List<TaskList> taskLists;
+    private TaskLists listsObject;
 
     @Before
     public void setUp() throws Exception {
-        taskLists = new ArrayList<TaskList>();
+        listsObject = new TaskLists();
+        listsObject.lists = new ArrayList<TaskList>();
+        taskLists = listsObject.lists;
         controller = new MainController();
     }
 
@@ -32,6 +37,31 @@ public class EverythingTest {
         TaskList list = taskLists.get(0);
         assertNotNull(list);
         assertEquals(list.getName(), NAME);
+    }
+
+    @Test
+    public final void testMoveToList() {
+        controller.createTaskList(taskLists, NAME);
+        controller.createTaskList(taskLists, NAME);
+        Task task = new Task();
+        TaskList oldList = taskLists.get(0);
+        oldList.addTask(task);
+        TaskList newList = taskLists.get(1);
+
+        assertTrue(oldList.getTasks().contains(task));
+        assertFalse(newList.getTasks().contains(task));
+        assertTrue(controller.moveTaskToList(task, oldList, newList));
+        assertFalse(oldList.getTasks().contains(task));
+        assertTrue(newList.getTasks().contains(task));
+        assertTrue(controller.moveTaskToList(task, newList, oldList));
+        assertTrue(oldList.getTasks().contains(task));
+        assertFalse(newList.getTasks().contains(task));
+        assertTrue(controller.moveTaskToNextList(task, oldList, taskLists));
+        assertFalse(oldList.getTasks().contains(task));
+        assertTrue(newList.getTasks().contains(task));
+
+        assertFalse(controller.moveTaskToList(task, oldList, newList));
+
     }
 
     @Test

@@ -8,8 +8,8 @@
     <item
         android:id="@+id/action_move"
         android:orderInCategory="50"
-        android:showAsAction="ifRoom"
-        android:title="Move to list..."/>"
+        android:showAsAction="never"
+        android:title="@string/action_move_to_list"/>
     <item
         android:id="@+id/action_create"
         android:orderInCategory="10"
