@@ -22,5 +22,16 @@
         android:icon="@android:drawable/ic_input_delete"
         android:showAsAction="never"
         android:title="@string/action_remove"/>
-
+    <item
+        android:id="@+id/action_refresh"
+        android:orderInCategory="100"
+        android:showAsAction="ifRoom"
+        android:icon="@android:drawable/ic_popup_sync"
+        android:title="@string/action_refresh"/>
+    <item
+        android:id="@+id/action_cleanup"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_cleanup"/>
+    
 </menu>

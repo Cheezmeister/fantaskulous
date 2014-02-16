@@ -1,6 +1,7 @@
 package com.luchenlabs.fantaskulous.model;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
@@ -43,6 +44,23 @@ public class TaskList extends Observable implements Observer {
 
     public ArrayList<Task> getTasks() {
         return tasks;
+    }
+
+    public boolean removeCompletedTasks() {
+        Iterator<Task> it = tasks.iterator();
+        while (it.hasNext()) {
+            Task task = it.next();
+            if (task.isComplete()) {
+                it.remove();
+                setChanged();
+                task.deleteObserver(this);
+            }
+        }
+        if (this.hasChanged()) {
+            notifyObservers();
+            return true;
+        }
+        return false;
     }
 
     public boolean removeTask(Task task) {

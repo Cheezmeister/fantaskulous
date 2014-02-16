@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,12 +33,18 @@ public class TaskListFragment extends Fragment {
         this._position = getArguments().getInt(ARG_TASKLIST);
         View v = inflater.inflate(R.layout.fragment_tasklist, null);
         updateTaskListView((TaskListView) v.findViewById(R.id.taskListView));
+        Log.i(getClass().getSimpleName(), "Created view for list " + this._position); //$NON-NLS-1$
 
         return v;
     }
 
     public void refresh() {
-        updateTaskListView((TaskListView) getView().findViewById(R.id.taskListView));
+        View view = getView();
+        if (view == null) {
+            Log.e(getClass().getSimpleName(), "No view found!"); //$NON-NLS-1$
+            return;
+        }
+        updateTaskListView((TaskListView) view.findViewById(R.id.taskListView));
     }
 
     public void updateTaskListView(final TaskListView taskListView) {

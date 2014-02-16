@@ -26,6 +26,12 @@ public class MainController {
         return moveTaskToList(task, currentList, newList);
     }
 
+    public void removeAllCompletedTasks(List<TaskList> lists) {
+        for (TaskList l : lists) {
+            l.removeCompletedTasks();
+        }
+    }
+
     public boolean removeTaskList(List<TaskList> lists, CharSequence name) {
         for (TaskList task : lists) {
             if (task.getName().equals(name))

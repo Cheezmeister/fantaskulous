@@ -56,6 +56,12 @@ public class MainActivity extends AbstractActivity {
             case R.id.action_remove:
                 removeList();
                 break;
+            case R.id.action_refresh:
+                refresh();
+                break;
+            case R.id.action_cleanup:
+                _controller.removeAllCompletedTasks(G.getState().getTaskLists());
+                break;
         }
         return super.onMenuItemSelected(featureId, item);
     }
@@ -75,8 +81,10 @@ public class MainActivity extends AbstractActivity {
         List<TaskList> taskLists = G.getState().getTaskLists();
         if (taskLists == null) {
             _spinner.setVisibility(View.VISIBLE);
+            Log.i(getClass().getSimpleName(), "Kicking off load task");
             new LoadTaskListTask().execute();
         } else {
+            Log.i(getClass().getSimpleName(), "Finishing on create with " + taskLists.size() + "lists");
             finishOnCreate(taskLists);
         }
     }
@@ -110,8 +118,8 @@ public class MainActivity extends AbstractActivity {
 
     private void finishOnCreate(List<TaskList> result) {
         _spinner.setVisibility(View.GONE);
-        Log.v(getClass().getSimpleName(), "finishOnCreate");
-        setTaskLists(result);
+        _controller = G.getState().getMainController();
+        refresh();
     }
 
     private void handleTasksLoaded(List<TaskList> result) {
@@ -119,11 +127,15 @@ public class MainActivity extends AbstractActivity {
         finishOnCreate(result);
     }
 
+    private void refresh() {
+        _pagerAdapter.refresh();
+    }
+
     private void removeList() {
         int position = _viewPager.getCurrentItem();
         CharSequence name = _pagerAdapter.getPageTitle(position);
         _controller.removeTaskList(G.getState().getTaskLists(), name);
-        _pagerAdapter.refresh(); // TODO register observer
+        refresh();
         _viewPager.setAdapter(_pagerAdapter);
     }
 
@@ -135,50 +147,32 @@ public class MainActivity extends AbstractActivity {
         }
     }
 
-    private void setTaskLists(List<TaskList> result) {
-        _controller = G.getState().getMainController();
-        Log.v(getClass().getSimpleName(), "setTaskLists");
-        _pagerAdapter.refresh();
-    }
-
     private class LoadTaskListTask extends AsyncTask<Void, Void, List<TaskList>> {
+        String filename = C.TASK_FILE;
+
         @Override
         protected List<TaskList> doInBackground(Void... params) {
-            String filename = C.TASK_FILE;
             InputStream is = null;
             try {
                 is = openFileInput(filename);
             } catch (FileNotFoundException e) {
                 Log.w(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename, e));
             }
-
             List<TaskList> lists = null;
-            if (is != null) {
-                try {
-                    lists = JsonPersister.load(is);
-                } catch (JsonParseException e) {
-                    Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
-                } catch (Exception e) {
-                    Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
-                }
+
+            lists = attemptLoad(is);
+
+            if (lists != null)
+                return lists;
+
+            try {
+                AssetManager assetManager = getAssets();
+                is = assetManager.open(filename);
+            } catch (IOException e) {
+                Log.wtf(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename, e));
             }
-            if (lists == null) {
-                try {
-                    AssetManager assetManager = getAssets();
-                    is = assetManager.open(filename);
-                } catch (IOException e) {
-                    Log.wtf(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename, e));
-                }
-                if (is != null) {
-                    try {
-                        lists = JsonPersister.load(is);
-                    } catch (JsonParseException e) {
-                        Log.wtf(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
-                    } catch (Exception e) {
-                        Log.wtf(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
-                    }
-                }
-            }
+
+            lists = attemptLoad(is);
 
             if (lists == null)
                 return new ArrayList<TaskList>();
@@ -196,6 +190,19 @@ public class MainActivity extends AbstractActivity {
             super.onPostExecute(result);
 
             handleTasksLoaded(result);
+        }
+
+        private List<TaskList> attemptLoad(InputStream is) {
+            if (is != null) {
+                try {
+                    return JsonPersister.load(is);
+                } catch (JsonParseException e) {
+                    Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
+                } catch (Exception e) {
+                    Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
+                }
+            }
+            return null;
         }
 
     }

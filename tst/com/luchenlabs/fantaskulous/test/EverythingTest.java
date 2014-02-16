@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.luchenlabs.fantaskulous.controller.MainController;
+import com.luchenlabs.fantaskulous.controller.TaskListController;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
 import com.luchenlabs.fantaskulous.model.TaskLists;
@@ -29,6 +30,49 @@ public class EverythingTest {
         listsObject.lists = new ArrayList<TaskList>();
         taskLists = listsObject.lists;
         controller = new MainController();
+    }
+
+    @Test
+    public final void testCleanupWithNoCompletedTask() {
+        TaskList list = controller.createTaskList(taskLists, NAME);
+        List<Task> tasks = list.getTasks();
+
+        assertEquals(0, tasks.size());
+        controller.removeAllCompletedTasks(taskLists);
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
+    public final void testCleanupWithOneCompletedTask() {
+        TaskList list = controller.createTaskList(taskLists, NAME);
+        TaskListController tlc = new TaskListController();
+        Task task = tlc.addTask(list, "This is a dummy task");
+        List<Task> tasks = list.getTasks();
+
+        controller.removeAllCompletedTasks(taskLists);
+        assertEquals(1, tasks.size());
+
+        task.setComplete(true);
+        controller.removeAllCompletedTasks(taskLists);
+        assertEquals(0, tasks.size());
+    }
+
+    @Test
+    public final void testCleanupWithTwoCompletedTasks() {
+        TaskList list = controller.createTaskList(taskLists, NAME);
+        TaskListController tlc = new TaskListController();
+        tlc.addTask(list, "I'm complete").setComplete(true);
+        tlc.addTask(list, "I'm complete too").setComplete(true);
+        tlc.addTask(list, "I'm incomplete");
+
+        List<Task> tasks = list.getTasks();
+        assertEquals(3, tasks.size());
+
+        controller.removeAllCompletedTasks(taskLists);
+        assertEquals(1, tasks.size());
+
+        controller.removeAllCompletedTasks(taskLists);
+        assertEquals(1, tasks.size());
     }
 
     @Test

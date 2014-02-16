@@ -33,6 +33,6 @@
         android:layout_height="24dp"
         android:layout_alignParentRight="true"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_priority_medium" />
+        android:src="@drawable/ic_priority_medium" android:contentDescription="@string/priority_medium"/>
 
 </RelativeLayout>
