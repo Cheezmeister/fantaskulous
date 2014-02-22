@@ -25,6 +25,15 @@ import com.luchenlabs.fantaskulous.model.TaskLists;
 
 public class JsonPersister {
 
+    public static String getJSON(TaskLists object) {
+        Gson gson = new GsonBuilder()
+                .excludeFieldsWithoutExposeAnnotation()
+                .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter())
+                .create();
+        String json = gson.toJson(object);
+        return json;
+    }
+
     public static List<TaskList> load(InputStream is) {
         InputStreamReader reader = new InputStreamReader(is);
         Gson gson = new Gson();
@@ -38,11 +47,8 @@ public class JsonPersister {
         TaskLists object = new TaskLists();
         object.lists = lists;
         OutputStreamWriter writer = new OutputStreamWriter(os);
-        Gson gson = new GsonBuilder()
-                .excludeFieldsWithoutExposeAnnotation()
-                .registerTypeAdapter(DateTime.class, new DateTimeTypeConverter())
-                .create();
-        writer.write(gson.toJson(object));
+        String json = getJSON(object);
+        writer.write(json);
         writer.close();
     }
 

@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import com.luchenlabs.fantaskulous.JsonPersister;
 import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.controller.MainController;
 import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fantaskulous.model.TaskLists;
 import com.luchenlabs.fantaskulous.view.TaskListFragmentPagerAdapter;
 
 public class MainActivity extends AbstractActivity {
@@ -58,6 +60,9 @@ public class MainActivity extends AbstractActivity {
                 break;
             case R.id.action_refresh:
                 refresh();
+                break;
+            case R.id.action_backup:
+                export();
                 break;
             case R.id.action_cleanup:
                 _controller.removeAllCompletedTasks(G.getState().getTaskLists());
@@ -114,6 +119,16 @@ public class MainActivity extends AbstractActivity {
                         }
                     }
                 });
+    }
+
+    private void export() {
+        TaskLists lol = new TaskLists();
+        lol.lists = (ArrayList<TaskList>) G.getState().getTaskLists();
+        Intent send = new Intent();
+        send.setAction(Intent.ACTION_SEND);
+        send.putExtra(Intent.EXTRA_TEXT, JsonPersister.getJSON(lol));
+        send.setType("text/json"); //$NON-NLS-1$
+        startActivity(Intent.createChooser(send, "Export Tasks"));
     }
 
     private void finishOnCreate(List<TaskList> result) {

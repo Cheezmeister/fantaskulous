@@ -22,5 +22,6 @@
     <string name="priority_medium">Med</string>
     <string name="priority_high">High</string>
     <string name="priority_low">Low</string>
+    <string name="action_backup_export">Backup/Export</string>
 
 </resources>
