@@ -9,3 +9,5 @@ Organizational tools are highly personal. What's perfect for one may be useless 
 
 Fantaskulous is mine. No task manager is quite like it, which is why I made it.
 
+License: [zlib](http://zlib.net/zlib_license.html)
+
