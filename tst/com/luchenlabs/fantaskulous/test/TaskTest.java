@@ -3,12 +3,14 @@ package com.luchenlabs.fantaskulous.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.luchenlabs.fantaskulous.C;
+import com.luchenlabs.fantaskulous.U;
 import com.luchenlabs.fantaskulous.controller.TaskController;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
@@ -23,6 +25,15 @@ public class TaskTest {
     public void setUp() throws Exception {
         task = new Task();
         controller = new TaskController();
+    }
+
+    public final void testAlwaysHasGuid() {
+        Task task = new Task();
+        assertNotNull(task.getGUID());
+
+        task = U.fromTodoTxt("O");
+        assertNotNull(task.getGUID());
+
     }
 
     @Test
