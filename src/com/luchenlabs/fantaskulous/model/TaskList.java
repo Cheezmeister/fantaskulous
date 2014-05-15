@@ -11,10 +11,17 @@ import com.luchenlabs.fantaskulous.C;
 
 public class TaskList extends Observable implements Observer {
 
+    public static Task fromTodoTxt(CharSequence todoTxt) {
+        Task t = new Task();
+
+        return t;
+    }
+
     @Expose
     private String name;
     @Expose
     private ArrayList<Task> tasks;
+
     @Expose
     private UUID guid;
 
@@ -32,6 +39,11 @@ public class TaskList extends Observable implements Observer {
         task.addObserver(this);
         setChanged();
         notifyObservers();
+    }
+
+    private void defaults() {
+        setName(C.EMPTY);
+        setTasks(new ArrayList<Task>());
     }
 
     public UUID getGuid() {
@@ -97,10 +109,5 @@ public class TaskList extends Observable implements Observer {
     public void update(Observable observable, Object data) {
         setChanged();
         notifyObservers();
-    }
-
-    private void defaults() {
-        setName(C.EMPTY);
-        setTasks(new ArrayList<Task>());
     }
 }

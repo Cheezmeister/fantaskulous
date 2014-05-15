@@ -48,6 +48,7 @@ public class TaskListFragment extends Fragment {
     }
 
     public void updateTaskListView(final TaskListView taskListView) {
+        taskListView.invalidate();
         List<TaskList> taskLists = G.getState().getTaskLists();
         if (taskLists != null) {
             taskListView.setModel(taskLists.get(_position));

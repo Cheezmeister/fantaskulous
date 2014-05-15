@@ -52,88 +52,8 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
         init(context);
     }
 
-    @Override
-    public void refresh() {
-        TaskArrayAdapter adapter = (TaskArrayAdapter) _listView.getAdapter();
-        if (adapter == null) {
-            adapter = new TaskArrayAdapter(getContext(), _taskList, _controller);
-        } else {
-            adapter.notifyDataSetChanged();
-        }
-        _listView.setAdapter(adapter);
-        adapter.refresh();
-    }
-
-    @Override
-    public void setModel(TaskList model) {
-        if (_taskList != null) {
-            _taskList.deleteObserver(this);
-        }
-        _taskList = model;
-        grabController();
-        _taskList.addObserver(this);
-        for (Task task : _taskList.getTasks()) {
-            task.addObserver(this);
-        }
-
-        _listView = (TaskListListView) findViewById(R.id.taskListListView);
-        _listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
-        _listView.setOnItemClickListener(new OnItemClickListener() {
-
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                _listView.setSelection(position);
-            }
-        });
-        hookListeners();
-        refresh();
-    }
-
-    @Override
-    public void update(Observable arg0, Object arg1) {
-
-        // TODO abstract sorting away
-        Comparator<Task> comparator = new Comparator<Task>() {
-            @Override
-            public int compare(Task lhs, Task rhs) {
-                int compComp = Boolean.valueOf(lhs.isComplete()).compareTo(rhs.isComplete());
-                if (compComp != 0)
-                    return compComp;
-
-                int priComp = lhs.getPriority().compareTo(rhs.getPriority());
-                if (priComp != 0)
-                    return priComp;
-                return 0; // TODO lhs.getDate().compareTo(rhs.getDate());
-            }
-
-        };
-        Collections.sort(_taskList.getTasks(), comparator);
-        ((TaskArrayAdapter) _listView.getAdapter()).refresh();
-    }
-
     protected TaskListController getController() {
         return _controller;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see android.view.View#onDetachedFromWindow()
-     */
-    @Override
-    protected void onDetachedFromWindow() {
-        unobserve();
-        super.onDetachedFromWindow();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see android.view.View#onFinishInflate()
-     */
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
     }
 
     /**
@@ -199,6 +119,65 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
         inflater.inflate(R.layout.view_tasklist, this, true);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see android.view.View#onDetachedFromWindow()
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        unobserve();
+        super.onDetachedFromWindow();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see android.view.View#onFinishInflate()
+     */
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+    }
+
+    @Override
+    public void refresh() {
+        TaskArrayAdapter adapter = (TaskArrayAdapter) _listView.getAdapter();
+        _listView.invalidate();
+        if (adapter == null) {
+            adapter = new TaskArrayAdapter(getContext(), _taskList, _controller);
+            _listView.setAdapter(adapter);
+        } else {
+            adapter.notifyDataSetChanged();
+        }
+        adapter.refresh();
+    }
+
+    @Override
+    public void setModel(TaskList model) {
+        if (_taskList != null) {
+            _taskList.deleteObserver(this);
+        }
+        _taskList = model;
+        grabController();
+        _taskList.addObserver(this);
+        for (Task task : _taskList.getTasks()) {
+            task.addObserver(this);
+        }
+
+        _listView = (TaskListListView) findViewById(R.id.taskListListView);
+        _listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
+        _listView.setOnItemClickListener(new OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                _listView.setSelection(position);
+            }
+        });
+        hookListeners();
+        refresh();
+    }
+
     private void unobserve() {
         if (_taskList != null) {
             _taskList.deleteObserver(this);
@@ -206,6 +185,28 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
                 task.deleteObserver(this);
             }
         }
+    }
+
+    @Override
+    public void update(Observable arg0, Object arg1) {
+
+        // TODO abstract sorting away
+        Comparator<Task> comparator = new Comparator<Task>() {
+            @Override
+            public int compare(Task lhs, Task rhs) {
+                int compComp = Boolean.valueOf(lhs.isComplete()).compareTo(rhs.isComplete());
+                if (compComp != 0)
+                    return compComp;
+
+                int priComp = lhs.getPriority().compareTo(rhs.getPriority());
+                if (priComp != 0)
+                    return priComp;
+                return 0; // TODO lhs.getDate().compareTo(rhs.getDate());
+            }
+
+        };
+        Collections.sort(_taskList.getTasks(), comparator);
+        ((TaskArrayAdapter) _listView.getAdapter()).refresh();
     }
 
 }

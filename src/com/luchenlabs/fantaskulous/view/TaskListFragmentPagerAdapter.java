@@ -82,9 +82,9 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
     }
 
     public void refresh() {
+        notifyDataSetChanged();
         for (TaskListFragment fragment : _fragments) {
             fragment.refresh();
         }
-        notifyDataSetChanged();
     }
 }

@@ -25,6 +25,28 @@ import com.luchenlabs.fantaskulous.model.Task;
 
 public class TaskView extends RelativeLayout implements FView<Task>, Observer {
 
+    /**
+     * Simple map from {@link Priority} to drawable
+     * 
+     * @param priority
+     * @return the priority icon if one exists, else 0
+     */
+    private static int iconForPriority(Priority priority) {
+        switch (priority) {
+            case HIGH:
+                // case HIGHEST:
+                return R.drawable.ic_priority_high;
+            case MEDIUM:
+                return R.drawable.ic_priority_medium;
+            case LOW:
+                // case LOWEST:
+                return R.drawable.ic_priority_low;
+            case NONE:
+            default:
+                return 0;
+        }
+    }
+
     private Task _task;
 
     private TaskController _controller;
@@ -41,77 +63,6 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
         super(context);
         init();
         setModel(task);
-    }
-
-    @Override
-    public void refresh() {
-        ImageView btnPriority = (ImageView) findViewById(R.id.btnPriority);
-        TextView textView = (TextView) findViewById(R.id.lblDesc);
-        CheckBox checkComplete = (CheckBox) findViewById(R.id.checkComplete);
-        EditText fieldDesc = (EditText) findViewById(R.id.fieldTempDesc);
-
-        String description = _task.getDescription();
-        btnPriority.setImageResource(iconForPriority(_task.getPriority()));
-        btnPriority.setContentDescription(_task.getPriority().toString());
-        textView.setText(description);
-        fieldDesc.setText(description);
-        checkComplete.setChecked(_task.isComplete());
-    }
-
-    @Override
-    public void setModel(Task m) {
-        if (_task == m)
-            return;
-        Task oldTask = _task;
-        _task = m;
-        grabController();
-        refresh();
-        if (oldTask == null)
-            hookListeners();
-    }
-
-    @Override
-    public void update(Observable observable, Object data) {
-        if (_task != observable)
-            return;
-        refresh();
-
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see android.view.View#onAttachedToWindow()
-     */
-    @Override
-    protected void onAttachedToWindow() {
-        if (_task != null) {
-            _task.addObserver(this);
-        }
-        super.onAttachedToWindow();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see android.view.View#onDetachedFromWindow()
-     */
-    @Override
-    protected void onDetachedFromWindow() {
-        if (_task != null) {
-            _task.deleteObserver(this);
-        }
-        super.onDetachedFromWindow();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see android.view.View#onFinishInflate()
-     */
-    @Override
-    protected void onFinishInflate() {
-        super.onFinishInflate();
     }
 
     /**
@@ -164,6 +115,57 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
         hookListeners();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see android.view.View#onAttachedToWindow()
+     */
+    @Override
+    protected void onAttachedToWindow() {
+        if (_task != null) {
+            _task.addObserver(this);
+        }
+        super.onAttachedToWindow();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see android.view.View#onDetachedFromWindow()
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        if (_task != null) {
+            _task.deleteObserver(this);
+        }
+        super.onDetachedFromWindow();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see android.view.View#onFinishInflate()
+     */
+    @Override
+    protected void onFinishInflate() {
+        super.onFinishInflate();
+    }
+
+    @Override
+    public void refresh() {
+        ImageView btnPriority = (ImageView) findViewById(R.id.btnPriority);
+        TextView textView = (TextView) findViewById(R.id.lblDesc);
+        CheckBox checkComplete = (CheckBox) findViewById(R.id.checkComplete);
+        EditText fieldDesc = (EditText) findViewById(R.id.fieldTempDesc);
+
+        String description = _task.getDescription();
+        btnPriority.setImageResource(iconForPriority(_task.getPriority()));
+        btnPriority.setContentDescription(_task.getPriority().toString());
+        textView.setText(description);
+        fieldDesc.setText(description);
+        checkComplete.setChecked(_task.isComplete());
+    }
+
     /**
      * Toggle between displaying a {@link TextView} and {@link EditText} to
      * allow user to edit the title in place.
@@ -180,24 +182,24 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
             editText.requestFocus();
     }
 
-    /**
-     * Simple map from {@link Priority} to drawable
-     * 
-     * @param priority
-     * @return the priority icon if one exists, else 0
-     */
-    private static int iconForPriority(Priority priority) {
-        switch (priority) {
-            case HIGH:
-                // case HIGHEST:
-                return R.drawable.ic_priority_high;
-            case MEDIUM:
-                return R.drawable.ic_priority_medium;
-            case LOW:
-                // case LOWEST:
-                return R.drawable.ic_priority_low;
-        }
-        return 0;
+    @Override
+    public void setModel(Task m) {
+        if (_task == m)
+            return;
+        Task oldTask = _task;
+        _task = m;
+        grabController();
+        refresh();
+        if (oldTask == null)
+            hookListeners();
+    }
+
+    @Override
+    public void update(Observable observable, Object data) {
+        if (_task != observable)
+            return;
+        refresh();
+
     }
 
 }
