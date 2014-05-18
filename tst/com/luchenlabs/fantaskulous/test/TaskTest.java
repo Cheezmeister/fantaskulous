@@ -4,13 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.luchenlabs.fantaskulous.C;
-import com.luchenlabs.fantaskulous.U;
+import com.luchenlabs.fantaskulous.U.Todo;
 import com.luchenlabs.fantaskulous.controller.TaskController;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
@@ -27,11 +28,12 @@ public class TaskTest {
         controller = new TaskController();
     }
 
+    @Test
     public final void testAlwaysHasGuid() {
         Task task = new Task();
         assertNotNull(task.getGUID());
 
-        task = U.fromTodoTxt("O");
+        task = Todo.fromTodoTxt("O", null);
         assertNotNull(task.getGUID());
 
     }
@@ -58,5 +60,25 @@ public class TaskTest {
         Priority old = task.getPriority();
         controller.cyclePriority(task);
         assertNotEquals(old, task.getPriority());
+    }
+
+    @Test
+    public final void testTodoTxtReadComplete() {
+        task = Todo.fromTodoTxt("x Call mom", null);
+        assertNotNull(task);
+        assertTrue(task.isComplete());
+        assertEquals(Priority.NONE, task.getPriority());
+    }
+
+    @Test
+    public final void testTodoTxtReadIncomplete() {
+        task = Todo.fromTodoTxt("", null);
+        assertNull(task);
+
+        task = Todo.fromTodoTxt("Do stuff", null);
+        assertNotNull(task);
+        assertEquals("Do stuff", task.getDescription());
+        assertEquals(Priority.NONE, task.getPriority());
+        assertNotNull(task.getGUID());
     }
 }

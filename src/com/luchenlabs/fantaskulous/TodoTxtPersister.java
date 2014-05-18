@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.List;
 
+import com.luchenlabs.fantaskulous.U.Todo;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
 public class TodoTxtPersister implements IPersister {
@@ -20,7 +21,7 @@ public class TodoTxtPersister implements IPersister {
     public void save(OutputStream os, List<TaskList> lists) throws IOException {
         PrintWriter pw = new PrintWriter(os);
         for (TaskList l : lists) {
-            pw.append(U.toTodoTxt(l));
+            pw.append(Todo.toTodoTxt(l));
         }
         pw.flush();
 

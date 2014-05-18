@@ -23,5 +23,7 @@
     <string name="priority_high">High</string>
     <string name="priority_low">Low</string>
     <string name="action_backup_export">Backup/Export</string>
-
+    <string name="action_import">Import</string>
+    <string name="export_tasks">Export Tasks</string>
+    
 </resources>
