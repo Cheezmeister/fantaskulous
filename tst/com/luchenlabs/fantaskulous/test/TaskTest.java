@@ -28,15 +28,6 @@ public class TaskTest {
         controller = new TaskController();
     }
 
-    public final void testAlwaysHasGuid() {
-        Task task = new Task();
-        assertNotNull(task.getGUID());
-
-        task = U.fromTodoTxt("O");
-        assertNotNull(task.getGUID());
-
-    }
-
     @Test
     public final void testAlwaysHasGuid() {
         Task task = new Task();

@@ -15,12 +15,6 @@ import org.joda.time.DateTime;
 
 import com.luchenlabs.fantaskulous.model.ITaskList;
 import com.luchenlabs.fantaskulous.model.Priority;
-import com.luchenlabs.fantaskulous.model.TaskList;
-import com.luchenlabs.fantaskulous.model.Task;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
@@ -76,8 +70,8 @@ public class U {
             String optionalCompletion = "(x )?"; //$NON-NLS-1$
             String optionalPriority = "(\\([A-Z]\\) )?"; //$NON-NLS-1$
             String optionalDate = "(\\d{4}-\\d{2}-\\d{2})?"; //$NON-NLS-1$
-            String text = "(.*)"; //$NON-NLS-1$
-            String optionalProjects = "( \\+[\\w_]+)*"; //$NON-NLS-1$
+            String text = "(.*?)"; //$NON-NLS-1$
+            String optionalProjects = "((?: \\+[\\w_]+)*)"; //$NON-NLS-1$
             String optionalContexts = "( @[\\w_]+)*"; //$NON-NLS-1$
             // TODO optionalFollowups /YYYY-MM-DD
             Pattern pattern = Pattern.compile(
@@ -111,7 +105,7 @@ public class U {
             }
 
             String priority = o.group(3);
-            if (priority != null && priority.matches("^\\([A-Z]\\)$")) {
+            if (priority != null && priority.trim().matches("^\\([A-Z]\\)$")) {
                 t.setPriority(U.Todo.fromTodoPriority(priority.charAt(1)));
             }
             String creationDate = o.group(4);
@@ -143,9 +137,9 @@ public class U {
 
                 // Add any lists we didn't find
                 for (String ctx : contexts) {
-                    TaskList context = new TaskContext(ctx);
-                    context.addTask(t);
-                    oLists.add(context);
+                    TaskList list = new TaskContext(ctx);
+                    list.addTask(t);
+                    oLists.add(list);
                 }
                 for (String prj : projects) {
                     TaskProject project = new TaskProject(prj);
@@ -171,14 +165,6 @@ public class U {
             }
         }
 
-        public static CharSequence toTodoTxt(TaskList taskList) {
-            StringBuilder sb = new StringBuilder();
-            for (Task t : taskList.getTasks()) {
-                sb.append(U.Todo.toTodoTxt(t, taskList.getName(), null)).append('\n');
-            }
-            return sb;
-        }
-
         public static CharSequence toTodoTxt(Task task, String context, String project) {
             StringBuilder sb = new StringBuilder()
                     .append(Todo.getTodoPriority(task.getPriority()))
@@ -195,6 +181,14 @@ public class U {
 
             sb.append(KEY_GUID + ':' + task.getGUID());
 
+            return sb;
+        }
+
+        public static CharSequence toTodoTxt(TaskList taskList) {
+            StringBuilder sb = new StringBuilder();
+            for (Task t : taskList.getTasks()) {
+                sb.append(U.Todo.toTodoTxt(t, taskList.getName(), null)).append('\n');
+            }
             return sb;
         }
 

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 public interface ITaskList {
 
+    public void addTask(Task task);
+
     public abstract String getName();
 
     public abstract ArrayList<Task> getTasks();

@@ -25,6 +25,7 @@ import com.luchenlabs.fantaskulous.TodoTxtPersister;
 import com.luchenlabs.fantaskulous.U;
 import com.luchenlabs.fantaskulous.controller.MainController;
 import com.luchenlabs.fantaskulous.controller.TaskListController;
+import com.luchenlabs.fantaskulous.model.ITaskList;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
@@ -162,23 +163,61 @@ public class EverythingTest {
     }
 
     @Test
-    public final void testTodoTxtReadComplete() {
-        Task t = U.fromTodoTxt("x Call mom");
+    public final void testTodoTxtReadBasicComplete() {
+        Task t = U.Todo.fromTodoTxt("x Call mom", null);
         assertNotNull(t);
         assertTrue(t.isComplete());
         assertEquals(Priority.NONE, t.getPriority());
     }
 
     @Test
-    public final void testTodoTxtReadIncomplete() {
-        Task t = U.fromTodoTxt("");
+    public final void testTodoTxtReadBasicIncomplete() {
+        Task t = U.Todo.fromTodoTxt("", null);
         assertNull(t);
 
-        t = U.fromTodoTxt("Do stuff");
+        t = U.Todo.fromTodoTxt("Do stuff", null);
         assertNotNull(t);
         assertEquals("Do stuff", t.getDescription());
         assertEquals(Priority.NONE, t.getPriority());
         assertNotNull(t.getGUID());
+    }
+
+    @Test
+    public final void testTodoTxtReadWithPriority() {
+        Task t = U.Todo.fromTodoTxt("(F) Do stuff", null);
+        assertNotNull(t);
+        assertEquals("Do stuff", t.getDescription());
+        assertEquals(Priority.HIGH, t.getPriority());
+
+        t = U.Todo.fromTodoTxt("(G) Do stuff", null);
+        assertNotNull(t);
+        assertEquals("Do stuff", t.getDescription());
+        assertEquals(Priority.MEDIUM, t.getPriority());
+
+        t = U.Todo.fromTodoTxt("(H) Do stuff", null);
+        assertNotNull(t);
+        assertEquals("Do stuff", t.getDescription());
+        assertEquals(Priority.LOW, t.getPriority());
+
+        // IMPORTANT
+        t = U.Todo.fromTodoTxt("(A) Do stuff", null);
+        assertNotNull(t);
+        assertEquals("Do stuff", t.getDescription());
+        assertEquals(Priority.NONE, t.getPriority());
+    }
+
+    @Test
+    public final void testTodoTxtReadWithProjectsAndContexts() {
+        List<ITaskList> lol = new ArrayList<ITaskList>();
+        assertEquals(0, lol.size());
+        Task t = U.Todo.fromTodoTxt("Eat food erryday +Gangsta +Alimentation @wendys", lol);
+        assertNotNull(t);
+        assertEquals(3, lol.size());
+        for (ITaskList l : lol) {
+            ArrayList<Task> tasks = l.getTasks();
+            assertEquals(1, tasks.size());
+            assertEquals(t, tasks.get(0));
+        }
     }
 
     @Test

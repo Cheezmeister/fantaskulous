@@ -28,6 +28,7 @@ public class TaskList extends Observable implements ITaskList, Observer {
         this.setName(name);
     }
 
+    @Override
     public void addTask(Task task) {
         tasks.add(task);
         task.addObserver(this);
