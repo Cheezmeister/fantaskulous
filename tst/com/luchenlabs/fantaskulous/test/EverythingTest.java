@@ -3,6 +3,7 @@ package com.luchenlabs.fantaskulous.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -21,6 +22,7 @@ import org.junit.Test;
 import com.luchenlabs.fantaskulous.IPersister;
 import com.luchenlabs.fantaskulous.JsonPersister;
 import com.luchenlabs.fantaskulous.TodoTxtPersister;
+import com.luchenlabs.fantaskulous.U;
 import com.luchenlabs.fantaskulous.controller.MainController;
 import com.luchenlabs.fantaskulous.controller.TaskListController;
 import com.luchenlabs.fantaskulous.model.Priority;
@@ -157,6 +159,26 @@ public class EverythingTest {
 
         assertFalse(controller.removeTaskList(taskLists, NAME));
         assertEquals(taskLists.size(), 0);
+    }
+
+    @Test
+    public final void testTodoTxtReadComplete() {
+        Task t = U.fromTodoTxt("x Call mom");
+        assertNotNull(t);
+        assertTrue(t.isComplete());
+        assertEquals(Priority.NONE, t.getPriority());
+    }
+
+    @Test
+    public final void testTodoTxtReadIncomplete() {
+        Task t = U.fromTodoTxt("");
+        assertNull(t);
+
+        t = U.fromTodoTxt("Do stuff");
+        assertNotNull(t);
+        assertEquals("Do stuff", t.getDescription());
+        assertEquals(Priority.NONE, t.getPriority());
+        assertNotNull(t.getGUID());
     }
 
     @Test
