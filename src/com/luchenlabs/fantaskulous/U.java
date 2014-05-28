@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
-import com.luchenlabs.fantaskulous.model.ITaskList;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
@@ -40,8 +39,8 @@ public class U {
             return Priority.NONE;
         }
 
-        public static List<ITaskList> fromTodoTxt(InputStream input) {
-            List<ITaskList> retVal = new ArrayList<ITaskList>();
+        public static List<TaskList> fromTodoTxt(InputStream input) {
+            List<TaskList> retVal = new ArrayList<TaskList>();
 
             Scanner reader = new Scanner(new InputStreamReader(input));
             while (reader.hasNextLine()) {
@@ -49,7 +48,8 @@ public class U {
                 if (line.length() == 0)
                     continue;
 
-                Task task = fromTodoTxt(line, retVal);
+                // TODO FIXME WRITEME
+                // Task task = fromTodoTxt(line, retVal);
             }
             return retVal;
         }
@@ -60,71 +60,82 @@ public class U {
          * @param line
          *            The input line
          * @param oLists
-         *            Existing {@link ITaskList}s. May be null. If the lists
-         *            this task belongs to don't exist they will be created.
+         *            Existing {@link TaskList}s. If null, projects and contexts
+         *            will be ignored. Any lists not already present in oLists
+         *            will be created and appended to it.
          * 
          * @return
          */
-        public static Task fromTodoTxt(String line, List<ITaskList> oLists) {
+        public static Task fromTodoTxt(String line, List<TaskList> oLists) {
             Task t = new Task();
-            String optionalCompletion = "(x )?"; //$NON-NLS-1$
-            String optionalPriority = "(\\([A-Z]\\) )?"; //$NON-NLS-1$
-            String optionalDate = "(\\d{4}-\\d{2}-\\d{2})?"; //$NON-NLS-1$
-            String text = "(.*?)"; //$NON-NLS-1$
-            String optionalProjects = "((?: \\+[\\w_]+)*)"; //$NON-NLS-1$
-            String optionalContexts = "( @[\\w_]+)*"; //$NON-NLS-1$
+            final String optionalCompletion = "(x )"; //$NON-NLS-1$
+            final String optionalDate = "(\\d{4}-\\d{2}-\\d{2})"; //$NON-NLS-1$
+            final String optionalPriority = "(\\([A-Z]\\) )"; //$NON-NLS-1$
+            final String text = "(.*?)"; //$NON-NLS-1$
+            final String optionalProjects = "((?: \\+[\\w_]+)+)"; //$NON-NLS-1$ 
+            final String optionalContexts = "((?: @[\\w_]+)+)"; //$NON-NLS-1$
             // TODO optionalFollowups /YYYY-MM-DD
-            Pattern pattern = Pattern.compile(
-                    optionalCompletion +
-                            optionalDate +
-                            optionalPriority +
-                            optionalDate +
-                            text +
-                            optionalProjects +
-                            optionalContexts);
 
+            // Build bigass nasty regex
+            Pattern pattern = Pattern.compile(
+                    optionalCompletion + '?' +
+                            optionalDate + '?' +
+                            optionalPriority + '?' +
+                            optionalDate + '?' +
+                            text +
+                            optionalProjects + '?' +
+                            optionalContexts + '?');
             Matcher o = pattern.matcher(line);
 
+            // Parse the line
             if (!o.matches())
                 throw new IllegalArgumentException(line);
 
+            // Check for an empty line
             if (o.group(0).length() == 0)
                 return null;
 
+            // Completion status
             String complete = o.group(1);
-            if (complete != null && complete.matches("x ")) {
+            if (complete != null && complete.matches(optionalCompletion)) {
                 t.setComplete(true);
             } else {
                 t.setComplete(false);
             }
             t.setPriority(Priority.NONE);
 
+            // Completion date
             String completionDate = o.group(2);
-            if (completionDate != null) {
+            if (completionDate != null && completionDate.matches(optionalDate)) {
                 t.setDate(DateTime.parse(completionDate));
             }
 
+            // Priority
             String priority = o.group(3);
-            if (priority != null && priority.trim().matches("^\\([A-Z]\\)$")) {
+            if (priority != null && priority.matches(optionalPriority)) {
                 t.setPriority(U.Todo.fromTodoPriority(priority.charAt(1)));
             }
-            String creationDate = o.group(4);
 
-            String description = o.group(5);
-            t.setDescription(description);
+            // TODO String creationDate = o.group(4);
 
-            Set<String> projects = null;
-            if (o.group(6) != null) {
-                projects = new HashSet<String>(Arrays.asList(o.group(6).trim().split(" ")));
+            // For now, accept an empty description if metadata is present. I'm
+            // not sure there's a use case for it, but rejecting lines like
+            // "x (A) @office"
+            // would likely do more harm than good
+            t.setDescription(o.group(5));
+
+            Set<String> projects = new HashSet<String>();
+            if (o.group(6) != null && o.group(6).matches(optionalProjects)) {
+                projects.addAll(Arrays.asList(o.group(6).trim().split(" ")));
             }
-            Set<String> contexts = null;
-            if (o.group(7) != null) {
-                contexts = new HashSet<String>(Arrays.asList(o.group(7).trim().split(" ")));
+            Set<String> contexts = new HashSet<String>();
+            if (o.group(7) != null && o.group(7).matches(optionalContexts)) {
+                contexts.addAll(Arrays.asList(o.group(7).trim().split(" ")));
             }
 
             // Add task to projects/contexts it belongs to
             if (oLists != null) {
-                for (ITaskList list : oLists) {
+                for (TaskList list : oLists) {
                     String name = list.getName();
                     if (projects.contains(name)) {
                         projects.remove(name);
@@ -135,7 +146,7 @@ public class U {
                     }
                 }
 
-                // Add any lists we didn't find
+                // Create any lists we didn't find
                 for (String ctx : contexts) {
                     TaskList list = new TaskContext(ctx);
                     list.addTask(t);

@@ -21,27 +21,29 @@ import org.junit.Test;
 
 import com.luchenlabs.fantaskulous.IPersister;
 import com.luchenlabs.fantaskulous.JsonPersister;
+import com.luchenlabs.fantaskulous.TaskContext;
+import com.luchenlabs.fantaskulous.TaskProject;
 import com.luchenlabs.fantaskulous.TodoTxtPersister;
 import com.luchenlabs.fantaskulous.U;
 import com.luchenlabs.fantaskulous.controller.MainController;
 import com.luchenlabs.fantaskulous.controller.TaskListController;
-import com.luchenlabs.fantaskulous.model.ITaskList;
+import com.luchenlabs.fantaskulous.model.TaskList;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
-import com.luchenlabs.fantaskulous.model.TaskLists;
+import com.luchenlabs.fantaskulous.model.ListOLists;
 
 public class EverythingTest {
 
     private static final String NAME = "Empty"; //$NON-NLS-1$
     private MainController controller;
     private List<TaskList> taskLists;
-    private TaskLists listsObject;
+    private ListOLists listsObject;
     private final String guid = "64517894-D7D5-11E3-B47E-D62D9A125B5A".toLowerCase();
 
     @Before
     public void setUp() throws Exception {
-        listsObject = new TaskLists();
+        listsObject = new ListOLists();
         listsObject.lists = new ArrayList<TaskList>();
         taskLists = listsObject.lists;
         controller = new MainController();
@@ -208,16 +210,32 @@ public class EverythingTest {
 
     @Test
     public final void testTodoTxtReadWithProjectsAndContexts() {
-        List<ITaskList> lol = new ArrayList<ITaskList>();
+        List<TaskList> lol = new ArrayList<TaskList>();
         assertEquals(0, lol.size());
-        Task t = U.Todo.fromTodoTxt("Eat food erryday +Gangsta +Alimentation @wendys", lol);
+        Task t = U.Todo.fromTodoTxt("Eat food erryday +Gangsta +Alimentation @lunch @wendys", lol);
         assertNotNull(t);
-        assertEquals(3, lol.size());
-        for (ITaskList l : lol) {
+        assertEquals(4, lol.size());
+        for (TaskList l : lol) {
             ArrayList<Task> tasks = l.getTasks();
             assertEquals(1, tasks.size());
             assertEquals(t, tasks.get(0));
         }
+
+        boolean a = false, b = false, c = false, d = false;
+        for (TaskList l : lol) {
+            if (l.getName().equals("+Gangsta") && l instanceof TaskProject)
+                a = true;
+            if (l.getName().equals("+Alimentation") && l instanceof TaskProject)
+                b = true;
+            if (l.getName().equals("@lunch") && l instanceof TaskContext)
+                c = true;
+            if (l.getName().equals("@wendys") && l instanceof TaskContext)
+                d = true;
+        }
+        assertEquals(true, a);
+        assertEquals(true, b);
+        assertEquals(true, c);
+        assertEquals(true, d);
     }
 
     @Test

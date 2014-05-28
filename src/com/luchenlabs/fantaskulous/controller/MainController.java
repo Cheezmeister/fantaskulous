@@ -2,13 +2,15 @@ package com.luchenlabs.fantaskulous.controller;
 
 import java.util.List;
 
+import com.luchenlabs.fantaskulous.TaskContext;
+import com.luchenlabs.fantaskulous.model.TaskList;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
 @SuppressWarnings("static-method")
 public class MainController {
     public TaskList createTaskList(List<TaskList> lists, CharSequence title) {
-        TaskList list = new TaskList(title.toString());
+        TaskContext list = new TaskContext(title.toString());
         lists.add(list);
         return list;
     }
@@ -33,9 +35,9 @@ public class MainController {
     }
 
     public boolean removeTaskList(List<TaskList> lists, CharSequence name) {
-        for (TaskList task : lists) {
-            if (task.getName().equals(name))
-                return lists.remove(task);
+        for (TaskList list : lists) {
+            if (list.getName().equals(name))
+                return lists.remove(list);
         }
         return false;
     }

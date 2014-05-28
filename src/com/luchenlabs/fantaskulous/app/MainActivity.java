@@ -20,62 +20,90 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.google.gson.JsonParseException;
-import com.luchenlabs.fantaskulous.C;
 import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.IPersister;
 import com.luchenlabs.fantaskulous.JsonPersister;
 import com.luchenlabs.fantaskulous.R;
+import com.luchenlabs.fantaskulous.TodoTxtPersister;
 import com.luchenlabs.fantaskulous.controller.MainController;
 import com.luchenlabs.fantaskulous.model.TaskList;
-import com.luchenlabs.fantaskulous.model.TaskLists;
 import com.luchenlabs.fantaskulous.view.TaskListFragmentPagerAdapter;
 
 public class MainActivity extends AbstractActivity {
 
-    private class LoadTaskListTask extends AsyncTask<Void, Void, List<TaskList>> {
-        String filename = C.TASK_FILE;
+    public class FallbackAssetCranny implements NookOrCranny {
 
-        private List<TaskList> attemptLoad(InputStream is) {
-            if (is != null) {
-                try {
-                    return persister.load(is);
-                } catch (JsonParseException e) {
-                    Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
-                } catch (Exception e) {
-                    Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
-                }
+        private final String _filename;
+
+        public FallbackAssetCranny(String filename) {
+            this._filename = filename;
+        }
+
+        @Override
+        public InputStream fetchMeAnInputStream() {
+            try {
+                AssetManager assetManager = getAssets();
+                return assetManager.open(_filename);
+            } catch (IOException e) {
+                Log.wtf(getClass().getSimpleName(), getString(R.string.fmt_not_found, _filename, e));
             }
+            return null;
+        }
+
+        @Override
+        public OutputStream fetchMeAnOutputStream() {
+            throw new UnsupportedOperationException("Not implemented!"); //$NON-NLS-1$
+        }
+
+    }
+
+    private class LoadTaskListTask extends AsyncTask<Void, Void, List<TaskList>> {
+
+        private List<TaskList> attemptLoad(IPersister persister, InputStream is) throws JsonParseException, Exception {
+            if (is != null) { return (persister.load(is)); }
             return null;
         }
 
         @Override
         protected List<TaskList> doInBackground(Void... params) {
             InputStream is = null;
-            try {
-                is = openFileInput(filename);
-            } catch (FileNotFoundException e) {
-                Log.w(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename, e));
+
+            for (IPersister persister : persisters) {
+                String filename = persister.getDefaultFilename();
+                Log.i(getClass().getSimpleName(), "Looking for " + filename); //$NON-NLS-1$
+
+                // Attempt load first from local, then from assets
+                NookOrCranny[] nooksAndCrannies = new NookOrCranny[] {
+                        new LocalFileCranny(filename),
+                        new FallbackAssetCranny(filename)
+                };
+
+                for (NookOrCranny noc : nooksAndCrannies) {
+
+                    // Open if we can. If something went wrong, bail and fall
+                    // back
+                    is = noc.fetchMeAnInputStream();
+                    if (is == null)
+                        continue;
+                    Log.i(getClass().getSimpleName(), "Found a stream"); //$NON-NLS-1$
+
+                    List<TaskList> lists = null;
+                    try {
+                        lists = attemptLoad(persister, is);
+                    } catch (JsonParseException e) {
+                        Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
+                    } catch (Exception e) {
+                        Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
+                    }
+                    if (lists != null) {
+                        Log.d(getClass().getSimpleName(), "Success!");
+                        return lists;
+                    }
+
+                    Log.d(getClass().getSimpleName(), "Error reading " + filename);
+                }
             }
-            List<TaskList> lists = null;
-
-            lists = attemptLoad(is);
-
-            if (lists != null)
-                return lists;
-
-            try {
-                AssetManager assetManager = getAssets();
-                is = assetManager.open(filename);
-            } catch (IOException e) {
-                Log.wtf(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename, e));
-            }
-
-            lists = attemptLoad(is);
-
-            if (lists == null)
-                return new ArrayList<TaskList>();
-
-            return lists;
+            return new ArrayList<TaskList>();
         }
 
         /*
@@ -92,28 +120,66 @@ public class MainActivity extends AbstractActivity {
 
     }
 
+    public class LocalFileCranny implements NookOrCranny {
+
+        private final String _filename;
+
+        public LocalFileCranny(String filename) {
+            this._filename = filename;
+        }
+
+        @Override
+        public InputStream fetchMeAnInputStream() {
+            try {
+                return openFileInput(_filename);
+            } catch (FileNotFoundException e) {
+                Log.w(getClass().getSimpleName(), getString(R.string.fmt_not_found, _filename, e));
+            }
+            return null;
+        }
+
+        @Override
+        public OutputStream fetchMeAnOutputStream() {
+            try {
+                return openFileOutput(_filename, MODE_PRIVATE);
+            } catch (FileNotFoundException e) {
+                Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, _filename, e));
+            }
+            return null;
+        }
+    }
+
     private class SaveTaskListTask extends AsyncTask<List<TaskList>, Void, Void> {
 
         @Override
         protected Void doInBackground(List<TaskList>... params) {
-            String filename = C.TASK_FILE;
-            OutputStream os = null;
+            for (IPersister persister : persisters) {
+                String filename = persister.getDefaultFilename();
+                OutputStream os = null;
 
-            try {
-                os = openFileOutput(filename, MODE_PRIVATE);
-            } catch (FileNotFoundException e) {
-                Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
-            }
+                NookOrCranny[] nooksAndCrannies = new NookOrCranny[] {
+                        new LocalFileCranny(filename)
+                };
 
-            ArrayList<TaskList> lists = new ArrayList<TaskList>(params[0]);
+                for (NookOrCranny noc : nooksAndCrannies) {
 
-            try {
-                persister.save(os, lists);
-                os.close();
-            } catch (IOException e) {
-                Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
-            } catch (Exception e) {
-                Log.wtf(getClass().getSimpleName(), String.format("Unexpected exception %s", e.toString())); //$NON-NLS-1$
+                    os = noc.fetchMeAnOutputStream();
+
+                    if (os == null)
+                        continue;
+
+                    ArrayList<TaskList> lists = new ArrayList<TaskList>(params[0]);
+
+                    try {
+                        persister.save(os, lists);
+                        os.close();
+                    } catch (IOException e) {
+                        Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
+                    } catch (Exception e) {
+                        Log.wtf(getClass().getSimpleName(), String.format("Unexpected exception %s", e.toString())); //$NON-NLS-1$
+                    }
+
+                }
             }
             return null;
         }
@@ -121,6 +187,16 @@ public class MainActivity extends AbstractActivity {
     }
 
     private static final int CODE_IMPORT = 3456;
+
+    private static List<TaskList> downcast(List<TaskList> in) {
+        List<TaskList> taskLists = new ArrayList<TaskList>();
+        for (TaskList l : in) {
+            if (l instanceof TaskList) {
+                taskLists.add(l);
+            }
+        }
+        return taskLists;
+    }
 
     private TaskListFragmentPagerAdapter _pagerAdapter;
 
@@ -130,7 +206,10 @@ public class MainActivity extends AbstractActivity {
 
     private MainController _controller;
 
-    private final IPersister persister = new JsonPersister();
+    private final IPersister[] persisters = {
+            new JsonPersister(),
+            new TodoTxtPersister(),
+    };
 
     private void createList() {
         showTextInputDialog(
@@ -149,11 +228,10 @@ public class MainActivity extends AbstractActivity {
     }
 
     private void export() {
-        TaskLists lol = new TaskLists();
-        lol.lists = (ArrayList<TaskList>) G.getState().getTaskLists();
         Intent send = new Intent();
         send.setAction(Intent.ACTION_SEND);
-        send.putExtra(Intent.EXTRA_TEXT, JsonPersister.getJSON(lol));
+        List<TaskList> taskLists = downcast(G.getState().getTaskLists());
+        send.putExtra(Intent.EXTRA_TEXT, JsonPersister.getJSON(taskLists));
         send.setType("text/json"); //$NON-NLS-1$
         startActivity(Intent.createChooser(send, getString(R.string.export_tasks)));
     }
@@ -186,8 +264,9 @@ public class MainActivity extends AbstractActivity {
                 ContentResolver cr = getContentResolver();
                 try {
                     InputStream is = cr.openInputStream(uri);
-                    List<TaskList> tl = persister.load(is);
-                    this.handleTasksLoaded(tl);
+                    IPersister persister = new JsonPersister();
+                    // TODO import todo.txt
+                    this.handleTasksLoaded(persister.load(is));
                 } catch (IOException e) {
                     Log.e(getClass().getSimpleName(), "Importing failed", e); //$NON-NLS-1$
                 }
@@ -283,7 +362,7 @@ public class MainActivity extends AbstractActivity {
     private void saveTasks() {
         List<TaskList> taskLists = G.getState().getTaskLists();
         if (taskLists != null) {
-            new SaveTaskListTask().execute(taskLists);
+            new SaveTaskListTask().execute(downcast(taskLists));
         }
     }
 

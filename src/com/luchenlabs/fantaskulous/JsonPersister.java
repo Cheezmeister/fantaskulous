@@ -5,22 +5,28 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.luchenlabs.fantaskulous.model.TaskList;
-import com.luchenlabs.fantaskulous.model.TaskLists;
+import com.luchenlabs.fantaskulous.model.ListOLists;
 
 public class JsonPersister implements IPersister {
 
-    public static String getJSON(TaskLists object) {
+    public static String getJSON(List<TaskList> lists) {
+        ListOLists lol = new ListOLists();
+        lol.lists = lists;
         Gson gson = new GsonBuilder()
                 .excludeFieldsWithoutExposeAnnotation()
                 .create();
-        String json = gson.toJson(object);
+        String json = gson.toJson(lol);
         return json;
+    }
+
+    @Override
+    public String getDefaultFilename() {
+        return C.TASK_FILE;
     }
 
     /*
@@ -32,7 +38,7 @@ public class JsonPersister implements IPersister {
     public List<TaskList> load(InputStream is) {
         InputStreamReader reader = new InputStreamReader(is);
         Gson gson = new Gson();
-        TaskLists lol = gson.fromJson(reader, TaskLists.class);
+        ListOLists lol = gson.fromJson(reader, ListOLists.class);
         if (lol == null)
             return null;
         return lol.lists;
@@ -46,11 +52,8 @@ public class JsonPersister implements IPersister {
      */
     @Override
     public void save(OutputStream os, List<TaskList> lists) throws IOException {
-        TaskLists object = new TaskLists();
-        object.lists = new ArrayList<TaskList>(lists);
         OutputStreamWriter writer = new OutputStreamWriter(os);
-        String json = getJSON(object);
-        writer.write(json);
+        writer.write(getJSON(lists));
         writer.close();
     }
 }

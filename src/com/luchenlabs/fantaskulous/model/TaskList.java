@@ -9,7 +9,7 @@ import java.util.UUID;
 import com.google.gson.annotations.Expose;
 import com.luchenlabs.fantaskulous.C;
 
-public class TaskList extends Observable implements ITaskList, Observer {
+public class TaskList extends Observable implements Observer {
 
     @Expose
     private String name;
@@ -28,7 +28,6 @@ public class TaskList extends Observable implements ITaskList, Observer {
         this.setName(name);
     }
 
-    @Override
     public void addTask(Task task) {
         tasks.add(task);
         task.addObserver(this);
@@ -45,12 +44,10 @@ public class TaskList extends Observable implements ITaskList, Observer {
         return guid;
     }
 
-    @Override
     public String getName() {
         return name;
     }
 
-    @Override
     public ArrayList<Task> getTasks() {
         return tasks;
     }
@@ -72,7 +69,6 @@ public class TaskList extends Observable implements ITaskList, Observer {
         return false;
     }
 
-    @Override
     public boolean removeTask(Task task) {
         boolean modified = tasks.remove(task);
         if (modified) {
@@ -86,14 +82,12 @@ public class TaskList extends Observable implements ITaskList, Observer {
         this.guid = guid;
     }
 
-    @Override
     public void setName(String name) {
         this.name = name;
         setChanged();
         notifyObservers();
     }
 
-    @Override
     public void setTasks(ArrayList<Task> tasks) {
         this.tasks = tasks;
         setChanged();

@@ -12,9 +12,13 @@ import com.luchenlabs.fantaskulous.model.TaskList;
 public class TodoTxtPersister implements IPersister {
 
     @Override
+    public String getDefaultFilename() {
+        return C.TODO_TXT;
+    }
+
+    @Override
     public List<TaskList> load(InputStream is) {
-        // TODO Auto-generated method stub
-        return null;
+        return (Todo.fromTodoTxt(is));
     }
 
     @Override

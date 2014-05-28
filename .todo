@@ -1,0 +1,7 @@
+  Change state model to ITaskList(s); Map<UUID, Task>
+    Read todo.txt
+
+r rename fromTodoPriority
+Change priority alphas to A,B,C,D,E
+
+? Importance vs. Urgency

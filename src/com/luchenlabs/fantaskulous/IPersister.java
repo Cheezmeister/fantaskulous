@@ -9,6 +9,8 @@ import com.luchenlabs.fantaskulous.model.TaskList;
 
 public interface IPersister {
 
+    public abstract String getDefaultFilename();
+
     public abstract List<TaskList> load(InputStream is);
 
     public abstract void save(OutputStream os, List<TaskList> lists) throws IOException;
