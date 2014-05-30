@@ -2,6 +2,7 @@ package com.luchenlabs.fantaskulous.model;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.UUID;
@@ -9,10 +10,11 @@ import java.util.UUID;
 import com.google.gson.annotations.Expose;
 import com.luchenlabs.fantaskulous.C;
 
-public class TaskList extends Observable implements Observer {
+public class TaskList extends Observable implements Observer, Comparable<TaskList> {
 
     @Expose
     private String name;
+
     @Expose
     private ArrayList<Task> tasks;
 
@@ -35,9 +37,15 @@ public class TaskList extends Observable implements Observer {
         notifyObservers();
     }
 
+    @Override
+    public int compareTo(TaskList another) {
+        return this.name.compareTo(another.name);
+    }
+
     private void defaults() {
         setName(C.EMPTY);
         setTasks(new ArrayList<Task>());
+        setGuid(UUID.randomUUID());
     }
 
     public UUID getGuid() {
@@ -48,7 +56,7 @@ public class TaskList extends Observable implements Observer {
         return name;
     }
 
-    public ArrayList<Task> getTasks() {
+    public List<Task> getTasks() {
         return tasks;
     }
 

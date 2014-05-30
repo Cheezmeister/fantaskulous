@@ -2,9 +2,9 @@ package com.luchenlabs.fantaskulous.model;
 
 import java.util.Date;
 import java.util.Observable;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
-
-import org.joda.time.DateTime;
 
 import com.google.gson.annotations.Expose;
 import com.luchenlabs.fantaskulous.C;
@@ -14,14 +14,13 @@ public class Task extends Observable {
     @Expose
     private Priority priority;
 
-    // These fields not used by us and exist solely to avoid clobbering existing
+    // Date fields not used by us and exist solely to avoid clobbering existing
     // todo.txt entries
     @Expose
     private Date date;
+
     @Expose
     private Date dateOfCompletion;
-
-    // public transient List<UUID> blockingTasks; // TODO
 
     @Expose
     private String description;
@@ -31,6 +30,12 @@ public class Task extends Observable {
 
     @Expose
     private UUID guid;
+
+    private transient SortedSet<TaskProject> projects;
+
+    private transient SortedSet<TaskContext> contexts;
+
+    // public transient List<UUID> blockingTasks; // TODO
 
     public Task() {
         defaults();
@@ -42,10 +47,16 @@ public class Task extends Observable {
     }
 
     private void defaults() {
+        projects = new TreeSet<TaskProject>();
+        contexts = new TreeSet<TaskContext>();
         setDescription(C.EMPTY);
         guid = UUID.randomUUID();
-        setDate(DateTime.now());
+        setDate(new Date());
         setPriority(Priority.MEDIUM);
+    }
+
+    public SortedSet<TaskContext> getContexts() {
+        return this.contexts;
     }
 
     public String getDescription() {
@@ -60,17 +71,23 @@ public class Task extends Observable {
         return priority;
     }
 
+    public SortedSet<TaskProject> getProjects() {
+        return projects;
+    }
+
     public boolean isComplete() {
         return completed;
     }
 
     public void setComplete(boolean isComplete) {
         this.completed = isComplete;
+        this.priority = Priority.NONE;
         setChanged();
         notifyObservers();
     }
 
-    public void setDate(DateTime date) {
+    public void setDate(Date date) {
+        this.date = date;
         setChanged();
         notifyObservers();
     }

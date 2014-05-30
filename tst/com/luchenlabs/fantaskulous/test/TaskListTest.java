@@ -4,12 +4,14 @@
 package com.luchenlabs.fantaskulous.test;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import com.luchenlabs.fantaskulous.controller.TaskListController;
 import com.luchenlabs.fantaskulous.model.Task;
+import com.luchenlabs.fantaskulous.model.TaskContext;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
 /**
@@ -27,10 +29,18 @@ public class TaskListTest {
      */
     @Before
     public void setUp() throws Exception {
-        list = new TaskList("Test list");
+        list = new TaskContext("Test list");
         list.addTask(new Task(list, "Test task"));
         parent = new TaskListController();
 
+    }
+
+    @Test
+    public void testAddsSelfToTask() throws Exception {
+        list.addTask(new Task());
+        for (Task t : list.getTasks()) {
+            assertTrue(t.getContexts().contains(list) || t.getProjects().contains(list));
+        }
     }
 
     /**
@@ -40,8 +50,13 @@ public class TaskListTest {
      */
     @Test
     public final void testAddTask() {
-        Task t = (Task) parent.addTask(list, "this is a task");
+        Task t = parent.addTask(list, "this is a task");
         assertNotNull(t);
+    }
+
+    @Test
+    public final void testAlwaysHasGuid() {
+        assertNotNull(list.getGuid());
     }
 
     @Test

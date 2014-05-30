@@ -26,6 +26,7 @@ import android.widget.TextView.OnEditorActionListener;
 import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.controller.TaskListController;
+import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
@@ -105,8 +106,9 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Task task = (Task) parent.getItemAtPosition(position);
+                FantaskulousModel model = G.getState().getModel();
                 G.getState().getMainController()
-                        .moveTaskToNextList(task, _taskList, G.getState().getTaskLists());
+                        .moveTaskToNextList(task, _taskList, model.taskLists);
                 return true;
             }
         });

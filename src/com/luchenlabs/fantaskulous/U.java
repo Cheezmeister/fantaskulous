@@ -13,9 +13,13 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
+import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.Priority;
+import com.luchenlabs.fantaskulous.model.SigillyTaskList;
 import com.luchenlabs.fantaskulous.model.Task;
+import com.luchenlabs.fantaskulous.model.TaskContext;
 import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fantaskulous.model.TaskProject;
 
 /**
  * Utilities
@@ -25,6 +29,7 @@ import com.luchenlabs.fantaskulous.model.TaskList;
  */
 public class U {
 
+    /** Utils for todo.txt */
     public static final class Todo {
 
         private static final String TODO_LOW = "(H) "; //$NON-NLS-1$
@@ -32,15 +37,30 @@ public class U {
         private static final String TODO_HIGH = "(F) "; //$NON-NLS-1$
         private static final String KEY_GUID = "guid"; //$NON-NLS-1$
 
-        static Priority fromTodoPriority(char letter) {
+        static Priority fromAlphaPriority(char letter) {
             if (letter == TODO_HIGH.charAt(1)) { return Priority.HIGH; }
             if (letter == TODO_MEDIUM.charAt(1)) { return Priority.MEDIUM; }
             if (letter == TODO_LOW.charAt(1)) { return Priority.LOW; }
             return Priority.NONE;
         }
 
-        public static List<TaskList> fromTodoTxt(InputStream input) {
-            List<TaskList> retVal = new ArrayList<TaskList>();
+        private static String getAlphaPriority(Priority p) {
+            switch (p) {
+                case HIGH:
+                    return TODO_HIGH;
+                case MEDIUM:
+                    return TODO_MEDIUM;
+                case LOW:
+                    return TODO_LOW;
+                case NONE:
+                default:
+                    return C.EMPTY;
+            }
+        }
+
+        public static FantaskulousModel modelFromTodoTxt(InputStream input) {
+            FantaskulousModel model = new FantaskulousModel();
+            model.taskLists = new ArrayList<TaskList>();
 
             Scanner reader = new Scanner(new InputStreamReader(input));
             while (reader.hasNextLine()) {
@@ -48,10 +68,14 @@ public class U {
                 if (line.length() == 0)
                     continue;
 
-                // TODO FIXME WRITEME
-                // Task task = fromTodoTxt(line, retVal);
+                Task task = taskFromTodoTxt(line, model.taskLists);
+
+                // TODO try to preserve input order on write
+                model.tasks.put(task.getGUID(), task);
             }
-            return retVal;
+            reader.close();
+
+            return model;
         }
 
         /**
@@ -66,8 +90,8 @@ public class U {
          * 
          * @return
          */
-        public static Task fromTodoTxt(String line, List<TaskList> oLists) {
-            Task t = new Task();
+        public static Task taskFromTodoTxt(String line, List<TaskList> oLists) {
+            Task retVal = new Task();
             final String optionalCompletion = "(x )"; //$NON-NLS-1$
             final String optionalDate = "(\\d{4}-\\d{2}-\\d{2})"; //$NON-NLS-1$
             final String optionalPriority = "(\\([A-Z]\\) )"; //$NON-NLS-1$
@@ -98,108 +122,98 @@ public class U {
             // Completion status
             String complete = o.group(1);
             if (complete != null && complete.matches(optionalCompletion)) {
-                t.setComplete(true);
+                retVal.setComplete(true);
             } else {
-                t.setComplete(false);
+                retVal.setComplete(false);
             }
-            t.setPriority(Priority.NONE);
 
             // Completion date
             String completionDate = o.group(2);
             if (completionDate != null && completionDate.matches(optionalDate)) {
-                t.setDate(DateTime.parse(completionDate));
+                retVal.setDate(DateTime.parse(completionDate).toDate());
             }
 
             // Priority
+            retVal.setPriority(Priority.NONE);
             String priority = o.group(3);
             if (priority != null && priority.matches(optionalPriority)) {
-                t.setPriority(U.Todo.fromTodoPriority(priority.charAt(1)));
+                retVal.setPriority(U.Todo.fromAlphaPriority(priority.charAt(1)));
             }
 
             // TODO String creationDate = o.group(4);
 
             // For now, accept an empty description if metadata is present. I'm
-            // not sure there's a use case for it, but rejecting lines like
-            // "x (A) @office"
-            // would likely do more harm than good
-            t.setDescription(o.group(5));
+            // not sure there's a use case for it, but if your todo.txt is full
+            // of lines like "x (A) @office", that's your problem.
+            retVal.setDescription(o.group(5));
 
             Set<String> projects = new HashSet<String>();
             if (o.group(6) != null && o.group(6).matches(optionalProjects)) {
-                projects.addAll(Arrays.asList(o.group(6).trim().split(" ")));
+                projects.addAll(Arrays.asList(o.group(6).trim().split(C.SPACE)));
             }
             Set<String> contexts = new HashSet<String>();
             if (o.group(7) != null && o.group(7).matches(optionalContexts)) {
-                contexts.addAll(Arrays.asList(o.group(7).trim().split(" ")));
+                contexts.addAll(Arrays.asList(o.group(7).trim().split(C.SPACE)));
             }
 
             // Add task to projects/contexts it belongs to
             if (oLists != null) {
                 for (TaskList list : oLists) {
-                    String name = list.getName();
+                    String name = list.toString();
                     if (projects.contains(name)) {
                         projects.remove(name);
-                        list.getTasks().add(t);
+                        list.addTask(retVal);
                     } else if (contexts.contains(name)) {
                         contexts.remove(name);
-                        list.getTasks().add(t);
+                        list.addTask(retVal);
                     }
                 }
 
                 // Create any lists we didn't find
+                TaskList list;
                 for (String ctx : contexts) {
-                    TaskList list = new TaskContext(ctx);
-                    list.addTask(t);
+                    list = new TaskContext(ctx.substring(1));
+                    list.addTask(retVal);
                     oLists.add(list);
                 }
                 for (String prj : projects) {
-                    TaskProject project = new TaskProject(prj);
-                    project.addTask(t);
-                    oLists.add(project);
+                    list = new TaskProject(prj.substring(1));
+                    list.addTask(retVal);
+                    oLists.add(list);
                 }
             }
 
-            return t;
+            return retVal;
         }
 
-        private static String getTodoPriority(Priority p) {
-            switch (p) {
-                case HIGH:
-                    return TODO_HIGH;
-                case MEDIUM:
-                    return TODO_MEDIUM;
-                case LOW:
-                    return TODO_LOW;
-                case NONE:
-                default:
-                    return C.EMPTY;
-            }
-        }
-
-        public static CharSequence toTodoTxt(Task task, String context, String project) {
+        /**
+         * Convert a single task to todo.txt format
+         * 
+         * @param task
+         *            The task
+         * @return One line in todo.txt format representing the task
+         */
+        public static CharSequence toTodoTxt(Task task) {
             StringBuilder sb = new StringBuilder()
-                    .append(Todo.getTodoPriority(task.getPriority()))
+                    .append(Todo.getAlphaPriority(task.getPriority()))
                     .append(task.isComplete() ? "x " : C.EMPTY) //$NON-NLS-1$
                     .append(task.getDescription()).append(' ');
 
-            if (project != null && project.length() > 0) {
-                sb.append('+' + project).append(' ');
+            // Contexts come first. Why? Contexts are more useful, because I
+            // declare it so.
+            for (SigillyTaskList context : task.getContexts()) {
+                sb.append(context).append(' ');
             }
 
-            if (context != null && context.length() > 0) {
-                sb.append('@' + context).append(' ');
+            // Tack em on.
+            for (TaskProject project : task.getProjects()) {
+                sb.append(project).append(' ');
             }
 
+            // This is a rather obtuse way to give tasks unique, stable IDs. I
+            // should do something more clever instead, but I won't.
             sb.append(KEY_GUID + ':' + task.getGUID());
 
-            return sb;
-        }
-
-        public static CharSequence toTodoTxt(TaskList taskList) {
-            StringBuilder sb = new StringBuilder();
-            for (Task t : taskList.getTasks()) {
-                sb.append(U.Todo.toTodoTxt(t, taskList.getName(), null)).append('\n');
-            }
             return sb;
         }
 

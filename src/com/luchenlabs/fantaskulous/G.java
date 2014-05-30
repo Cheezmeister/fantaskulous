@@ -1,11 +1,9 @@
 package com.luchenlabs.fantaskulous;
 
-import java.util.List;
-
 import com.luchenlabs.fantaskulous.controller.MainController;
 import com.luchenlabs.fantaskulous.controller.TaskController;
 import com.luchenlabs.fantaskulous.controller.TaskListController;
-import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 
 /**
  * Globals
@@ -14,25 +12,35 @@ import com.luchenlabs.fantaskulous.model.TaskList;
  * 
  */
 public class G {
-    private static State _state;
-
-    public static State getState() {
-        if (_state == null)
-            _state = new State();
-        return _state;
-    }
-
     public static class State {
-        private List<TaskList> taskLists;
-        private MainController mainController;
-        private TaskListController taskListController;
-        private TaskController taskController;
+
+        private FantaskulousModel model;
+
+        private final MainController mainController;
+        private final TaskListController taskListController;
+        private final TaskController taskController;
+
+        /**
+         * Ctor
+         */
+        public State() {
+            this.mainController = new MainController();
+            this.taskListController = new TaskListController();
+            this.taskController = new TaskController();
+        }
 
         /**
          * @return the mainController
          */
         public MainController getMainController() {
             return mainController;
+        }
+
+        /**
+         * @return the global data model
+         */
+        public FantaskulousModel getModel() {
+            return this.model;
         }
 
         /**
@@ -50,20 +58,23 @@ public class G {
         }
 
         /**
-         * This is the top level model for the app
+         * Set global data model
          * 
-         * @return top level model for the app
+         * @param model
          */
-        public List<TaskList> getTaskLists() {
-            return taskLists;
+        public void setModel(FantaskulousModel model) {
+            this.model = model;
+
         }
 
-        public void setTaskLists(List<TaskList> taskLists) {
-            this.taskLists = taskLists;
-            this.mainController = new MainController();
-            this.taskListController = new TaskListController();
-            this.taskController = new TaskController();
-        }
+    }
+
+    private static State _state;
+
+    public static State getState() {
+        if (_state == null)
+            _state = new State();
+        return _state;
     }
 
 }

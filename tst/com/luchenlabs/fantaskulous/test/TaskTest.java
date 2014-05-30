@@ -33,7 +33,7 @@ public class TaskTest {
         Task task = new Task();
         assertNotNull(task.getGUID());
 
-        task = Todo.fromTodoTxt("O", null);
+        task = Todo.taskFromTodoTxt("O", null);
         assertNotNull(task.getGUID());
 
     }
@@ -64,7 +64,7 @@ public class TaskTest {
 
     @Test
     public final void testTodoTxtReadComplete() {
-        task = Todo.fromTodoTxt("x Call mom", null);
+        task = Todo.taskFromTodoTxt("x Call mom", null);
         assertNotNull(task);
         assertTrue(task.isComplete());
         assertEquals(Priority.NONE, task.getPriority());
@@ -72,10 +72,10 @@ public class TaskTest {
 
     @Test
     public final void testTodoTxtReadIncomplete() {
-        task = Todo.fromTodoTxt("", null);
+        task = Todo.taskFromTodoTxt("", null);
         assertNull(task);
 
-        task = Todo.fromTodoTxt("Do stuff", null);
+        task = Todo.taskFromTodoTxt("Do stuff", null);
         assertNotNull(task);
         assertEquals("Do stuff", task.getDescription());
         assertEquals(Priority.NONE, task.getPriority());

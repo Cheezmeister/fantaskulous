@@ -1,7 +1,17 @@
-  Change state model to ITaskList(s); Map<UUID, Task>
+b dedupe
     Read todo.txt
 
-r rename fromTodoPriority
+r C into core package
 Change priority alphas to A,B,C,D,E
 
 ? Importance vs. Urgency
+
+  Blockers
+r JS model because screw writing a Java DAG
+
+        Ping Roy
+    Release
+  Release blockers 
+Clean up unimplemented crap
+Disable weird edit mode
+

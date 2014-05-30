@@ -1,7 +1,5 @@
 package com.luchenlabs.fantaskulous.app;
 
-import java.util.List;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -11,7 +9,7 @@ import android.view.ViewGroup;
 
 import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.R;
-import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.view.TaskListView;
 
 public class TaskListFragment extends Fragment {
@@ -49,9 +47,9 @@ public class TaskListFragment extends Fragment {
 
     public void updateTaskListView(final TaskListView taskListView) {
         taskListView.invalidate();
-        List<TaskList> taskLists = G.getState().getTaskLists();
-        if (taskLists != null) {
-            taskListView.setModel(taskLists.get(_position));
+        FantaskulousModel model = G.getState().getModel();
+        if (model != null) {
+            taskListView.setModel(model.taskLists.get(_position));
         }
     }
 }

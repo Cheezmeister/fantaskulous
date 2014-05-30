@@ -1,7 +1,6 @@
 package com.luchenlabs.fantaskulous.view;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -11,6 +10,7 @@ import android.util.Log;
 
 import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.app.TaskListFragment;
+import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
 public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
@@ -25,11 +25,11 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        List<TaskList> taskLists = G.getState().getTaskLists();
-        if (taskLists == null)
+        FantaskulousModel model = G.getState().getModel();
+        if (model == null)
             return 0;
-        Log.v(getClass().getSimpleName(), "getCount called, giving " + taskLists.size()); //$NON-NLS-1$
-        return taskLists.size();
+        Log.v(getClass().getSimpleName(), "getCount called, giving " + model.taskLists.size()); //$NON-NLS-1$
+        return model.taskLists.size();
     }
 
     @Override
@@ -41,7 +41,8 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
         TaskListFragment fragment = _fragments.get(position);
         Bundle args = new Bundle();
         args.putInt(TaskListFragment.ARG_TASKLIST, position);
-        if (_newList != null && _newList == G.getState().getTaskLists().get(position)) {
+        FantaskulousModel model = G.getState().getModel();
+        if (model != null && _newList != null && _newList == model.taskLists.get(position)) {
             args.putBoolean(TaskListFragment.ARG_IS_NEW, true);
         }
         fragment.setArguments(args);
@@ -63,12 +64,13 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public CharSequence getPageTitle(int position) {
-        TaskList taskList = G.getState().getTaskLists().get(position);
-        if (taskList == null) {
+        FantaskulousModel model = G.getState().getModel();
+        if (model == null) {
             Log.w(getClass().getSimpleName(), "Title for null list at position " + position); //$NON-NLS-1$
             return "Unknown"; //$NON-NLS-1$
         }
-        return taskList.getName(); // TODO fancy interactive title setting
+        // TODO fancy interactive title setting by poking title
+        return model.taskLists.get(position).toString();
     }
 
     /**

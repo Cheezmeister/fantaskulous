@@ -2,15 +2,15 @@ package com.luchenlabs.fantaskulous.controller;
 
 import java.util.List;
 
-import com.luchenlabs.fantaskulous.TaskContext;
-import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fantaskulous.model.SigillyTaskList;
 import com.luchenlabs.fantaskulous.model.Task;
+import com.luchenlabs.fantaskulous.model.TaskContext;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
 @SuppressWarnings("static-method")
 public class MainController {
     public TaskList createTaskList(List<TaskList> lists, CharSequence title) {
-        TaskContext list = new TaskContext(title.toString());
+        SigillyTaskList list = new TaskContext(title.toString());
         lists.add(list);
         return list;
     }

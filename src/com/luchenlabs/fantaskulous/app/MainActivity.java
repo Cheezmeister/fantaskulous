@@ -5,7 +5,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import android.content.ContentResolver;
 import android.content.Intent;
@@ -26,6 +29,8 @@ import com.luchenlabs.fantaskulous.JsonPersister;
 import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.TodoTxtPersister;
 import com.luchenlabs.fantaskulous.controller.MainController;
+import com.luchenlabs.fantaskulous.model.FantaskulousModel;
+import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
 import com.luchenlabs.fantaskulous.view.TaskListFragmentPagerAdapter;
 
@@ -57,28 +62,29 @@ public class MainActivity extends AbstractActivity {
 
     }
 
-    private class LoadTaskListTask extends AsyncTask<Void, Void, List<TaskList>> {
+    private class LoadTaskListTask extends AsyncTask<Void, Void, FantaskulousModel> {
 
-        private List<TaskList> attemptLoad(IPersister persister, InputStream is) throws JsonParseException, Exception {
+        private FantaskulousModel attemptLoad(IPersister persister, InputStream is) throws JsonParseException,
+                Exception {
             if (is != null) { return (persister.load(is)); }
             return null;
         }
 
         @Override
-        protected List<TaskList> doInBackground(Void... params) {
+        protected FantaskulousModel doInBackground(Void... params) {
             InputStream is = null;
 
+            FantaskulousModel model = null;
             for (IPersister persister : persisters) {
                 String filename = persister.getDefaultFilename();
                 Log.i(getClass().getSimpleName(), "Looking for " + filename); //$NON-NLS-1$
 
                 // Attempt load first from local, then from assets
-                NookOrCranny[] nooksAndCrannies = new NookOrCranny[] {
-                        new LocalFileCranny(filename),
-                        new FallbackAssetCranny(filename)
-                };
+                List<NookOrCranny> nocs = new ArrayList<NookOrCranny>();
+                nocs.addAll(Arrays.asList(defaultNooksAndCrannies(filename)));
+                nocs.add(new FallbackAssetCranny(filename));
 
-                for (NookOrCranny noc : nooksAndCrannies) {
+                for (NookOrCranny noc : nocs) {
 
                     // Open if we can. If something went wrong, bail and fall
                     // back
@@ -87,23 +93,25 @@ public class MainActivity extends AbstractActivity {
                         continue;
                     Log.i(getClass().getSimpleName(), "Found a stream"); //$NON-NLS-1$
 
-                    List<TaskList> lists = null;
                     try {
-                        lists = attemptLoad(persister, is);
+                        model = attemptLoad(persister, is);
                     } catch (JsonParseException e) {
                         Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
                     } catch (Exception e) {
                         Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
                     }
-                    if (lists != null) {
-                        Log.d(getClass().getSimpleName(), "Success!");
-                        return lists;
+                    if (model != null) {
+                        Log.d(getClass().getSimpleName(), "Success!"); //$NON-NLS-1$
+                        return model;
                     }
 
-                    Log.d(getClass().getSimpleName(), "Error reading " + filename);
+                    Log.d(getClass().getSimpleName(), "Error reading " + filename); //$NON-NLS-1$
                 }
             }
-            return new ArrayList<TaskList>();
+            model = new FantaskulousModel();
+            model.taskLists = new ArrayList<TaskList>();
+            model.tasks = new HashMap<UUID, Task>();
+            return model;
         }
 
         /*
@@ -112,10 +120,10 @@ public class MainActivity extends AbstractActivity {
          * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
          */
         @Override
-        protected void onPostExecute(List<TaskList> result) {
+        protected void onPostExecute(FantaskulousModel result) {
             super.onPostExecute(result);
 
-            handleTasksLoaded(result);
+            handleFinishedLoading(result);
         }
 
     }
@@ -168,10 +176,8 @@ public class MainActivity extends AbstractActivity {
                     if (os == null)
                         continue;
 
-                    ArrayList<TaskList> lists = new ArrayList<TaskList>(params[0]);
-
                     try {
-                        persister.save(os, lists);
+                        persister.save(os, G.getState().getModel());
                         os.close();
                     } catch (IOException e) {
                         Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
@@ -188,16 +194,6 @@ public class MainActivity extends AbstractActivity {
 
     private static final int CODE_IMPORT = 3456;
 
-    private static List<TaskList> downcast(List<TaskList> in) {
-        List<TaskList> taskLists = new ArrayList<TaskList>();
-        for (TaskList l : in) {
-            if (l instanceof TaskList) {
-                taskLists.add(l);
-            }
-        }
-        return taskLists;
-    }
-
     private TaskListFragmentPagerAdapter _pagerAdapter;
 
     private ViewPager _viewPager;
@@ -207,8 +203,8 @@ public class MainActivity extends AbstractActivity {
     private MainController _controller;
 
     private final IPersister[] persisters = {
-            new JsonPersister(),
             new TodoTxtPersister(),
+            new JsonPersister(),
     };
 
     private void createList() {
@@ -218,7 +214,8 @@ public class MainActivity extends AbstractActivity {
                 new StringRunnable() {
                     @Override
                     public void run(String string) {
-                        TaskList list = _controller.createTaskList(G.getState().getTaskLists(), string);
+                        List<TaskList> taskLists = G.getState().getModel().taskLists;
+                        TaskList list = _controller.createTaskList(taskLists, string);
                         if (list != null) {
                             _pagerAdapter.presentNewList(list);
                             _viewPager.refreshDrawableState();
@@ -227,24 +224,33 @@ public class MainActivity extends AbstractActivity {
                 });
     }
 
+    private NookOrCranny[] defaultNooksAndCrannies(String filename) {
+        return new NookOrCranny[] {
+                new LocalFileCranny(filename),
+        };
+    }
+
     private void export() {
         Intent send = new Intent();
         send.setAction(Intent.ACTION_SEND);
-        List<TaskList> taskLists = downcast(G.getState().getTaskLists());
-        send.putExtra(Intent.EXTRA_TEXT, JsonPersister.getJSON(taskLists));
+        FantaskulousModel model = G.getState().getModel();
+        if (model == null) {
+            Log.wtf(getClass().getSimpleName(), "No model found"); //$NON-NLS-1$
+        }
+        send.putExtra(Intent.EXTRA_TEXT, JsonPersister.getJSON((model.taskLists)));
         send.setType("text/json"); //$NON-NLS-1$
         startActivity(Intent.createChooser(send, getString(R.string.export_tasks)));
     }
 
-    private void finishOnCreate(List<TaskList> result) {
+    private void finishOnCreate() {
         _spinner.setVisibility(View.GONE);
         _controller = G.getState().getMainController();
         refresh();
     }
 
-    private void handleTasksLoaded(List<TaskList> result) {
-        G.getState().setTaskLists(result);
-        finishOnCreate(result);
+    private void handleFinishedLoading(FantaskulousModel model) {
+        G.getState().setModel(model);
+        finishOnCreate();
     }
 
     private void importFuckJavaKeywords() {
@@ -266,7 +272,7 @@ public class MainActivity extends AbstractActivity {
                     InputStream is = cr.openInputStream(uri);
                     IPersister persister = new JsonPersister();
                     // TODO import todo.txt
-                    this.handleTasksLoaded(persister.load(is));
+                    this.handleFinishedLoading(persister.load(is));
                 } catch (IOException e) {
                     Log.e(getClass().getSimpleName(), "Importing failed", e); //$NON-NLS-1$
                 }
@@ -286,14 +292,14 @@ public class MainActivity extends AbstractActivity {
 
         _viewPager.setAdapter(_pagerAdapter);
 
-        List<TaskList> taskLists = G.getState().getTaskLists();
-        if (taskLists == null) {
+        FantaskulousModel model = G.getState().getModel();
+        if (model == null) {
             _spinner.setVisibility(View.VISIBLE);
             Log.i(getClass().getSimpleName(), "Kicking off load task"); //$NON-NLS-1$
             new LoadTaskListTask().execute();
         } else {
-            Log.i(getClass().getSimpleName(), "Finishing on create with " + taskLists.size() + "lists"); //$NON-NLS-1$ //$NON-NLS-2$
-            finishOnCreate(taskLists);
+            Log.i(getClass().getSimpleName(), "Finishing on create with " + model.taskLists.size() + "lists"); //$NON-NLS-1$ //$NON-NLS-2$
+            finishOnCreate();
         }
     }
 
@@ -328,7 +334,7 @@ public class MainActivity extends AbstractActivity {
                 importFuckJavaKeywords();
                 break;
             case R.id.action_cleanup:
-                _controller.removeAllCompletedTasks(G.getState().getTaskLists());
+                _controller.removeAllCompletedTasks(G.getState().getModel().taskLists);
                 break;
         }
         return super.onMenuItemSelected(featureId, item);
@@ -353,16 +359,16 @@ public class MainActivity extends AbstractActivity {
     private void removeList() {
         int position = _viewPager.getCurrentItem();
         CharSequence name = _pagerAdapter.getPageTitle(position);
-        _controller.removeTaskList(G.getState().getTaskLists(), name);
+        _controller.removeTaskList(G.getState().getModel().taskLists, name);
         refresh();
         _viewPager.setAdapter(_pagerAdapter);
     }
 
     @SuppressWarnings("unchecked")
     private void saveTasks() {
-        List<TaskList> taskLists = G.getState().getTaskLists();
-        if (taskLists != null) {
-            new SaveTaskListTask().execute(downcast(taskLists));
+        FantaskulousModel model = G.getState().getModel();
+        if (model != null) {
+            new SaveTaskListTask().execute((model.taskLists));
         }
     }
 

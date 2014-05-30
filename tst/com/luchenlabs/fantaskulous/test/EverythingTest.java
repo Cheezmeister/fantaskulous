@@ -11,7 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import junit.framework.Assert;
 
@@ -19,33 +22,36 @@ import org.apache.commons.io.input.CharSequenceInputStream;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.luchenlabs.fantaskulous.C;
 import com.luchenlabs.fantaskulous.IPersister;
 import com.luchenlabs.fantaskulous.JsonPersister;
-import com.luchenlabs.fantaskulous.TaskContext;
-import com.luchenlabs.fantaskulous.TaskProject;
 import com.luchenlabs.fantaskulous.TodoTxtPersister;
 import com.luchenlabs.fantaskulous.U;
 import com.luchenlabs.fantaskulous.controller.MainController;
 import com.luchenlabs.fantaskulous.controller.TaskListController;
-import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
+import com.luchenlabs.fantaskulous.model.TaskContext;
 import com.luchenlabs.fantaskulous.model.TaskList;
-import com.luchenlabs.fantaskulous.model.ListOLists;
+import com.luchenlabs.fantaskulous.model.TaskProject;
 
 public class EverythingTest {
 
     private static final String NAME = "Empty"; //$NON-NLS-1$
     private MainController controller;
     private List<TaskList> taskLists;
-    private ListOLists listsObject;
+    private FantaskulousModel model;
     private final String guid = "64517894-D7D5-11E3-B47E-D62D9A125B5A".toLowerCase();
+    private Map<UUID, Task> tasks;
 
     @Before
     public void setUp() throws Exception {
-        listsObject = new ListOLists();
-        listsObject.lists = new ArrayList<TaskList>();
-        taskLists = listsObject.lists;
+        model = new FantaskulousModel();
+        model.taskLists = new ArrayList<TaskList>();
+        model.tasks = new HashMap<UUID, Task>();
+        taskLists = model.taskLists;
+        tasks = model.tasks;
         controller = new MainController();
     }
 
@@ -105,7 +111,7 @@ public class EverythingTest {
         IPersister p = new JsonPersister();
 
         InputStream sr = new CharSequenceInputStream("{ lists: [{ name: 'moo'}, {tasks: [{}, {}]}] }", "UTF-8");
-        List<TaskList> o = p.load(sr);
+        List<TaskList> o = p.load(sr).taskLists;
 
         assertEquals(2, o.size());
 
@@ -151,10 +157,10 @@ public class EverythingTest {
         controller.createTaskList(taskLists, NAME);
         assertEquals(taskLists.size(), 1);
 
-        controller.createTaskList(taskLists, NAME);
+        controller.createTaskList(taskLists, NAME + '2');
         assertEquals(taskLists.size(), 2);
 
-        assertTrue(controller.removeTaskList(taskLists, NAME));
+        assertTrue(controller.removeTaskList(taskLists, NAME + '2'));
         assertEquals(taskLists.size(), 1);
 
         assertTrue(controller.removeTaskList(taskLists, NAME));
@@ -166,7 +172,7 @@ public class EverythingTest {
 
     @Test
     public final void testTodoTxtReadBasicComplete() {
-        Task t = U.Todo.fromTodoTxt("x Call mom", null);
+        Task t = U.Todo.taskFromTodoTxt("x Call mom", null);
         assertNotNull(t);
         assertTrue(t.isComplete());
         assertEquals(Priority.NONE, t.getPriority());
@@ -174,10 +180,10 @@ public class EverythingTest {
 
     @Test
     public final void testTodoTxtReadBasicIncomplete() {
-        Task t = U.Todo.fromTodoTxt("", null);
+        Task t = U.Todo.taskFromTodoTxt("", null);
         assertNull(t);
 
-        t = U.Todo.fromTodoTxt("Do stuff", null);
+        t = U.Todo.taskFromTodoTxt("Do stuff", null);
         assertNotNull(t);
         assertEquals("Do stuff", t.getDescription());
         assertEquals(Priority.NONE, t.getPriority());
@@ -186,23 +192,23 @@ public class EverythingTest {
 
     @Test
     public final void testTodoTxtReadWithPriority() {
-        Task t = U.Todo.fromTodoTxt("(F) Do stuff", null);
+        Task t = U.Todo.taskFromTodoTxt("(F) Do stuff", null);
         assertNotNull(t);
         assertEquals("Do stuff", t.getDescription());
         assertEquals(Priority.HIGH, t.getPriority());
 
-        t = U.Todo.fromTodoTxt("(G) Do stuff", null);
+        t = U.Todo.taskFromTodoTxt("(G) Do stuff", null);
         assertNotNull(t);
         assertEquals("Do stuff", t.getDescription());
         assertEquals(Priority.MEDIUM, t.getPriority());
 
-        t = U.Todo.fromTodoTxt("(H) Do stuff", null);
+        t = U.Todo.taskFromTodoTxt("(H) Do stuff", null);
         assertNotNull(t);
         assertEquals("Do stuff", t.getDescription());
         assertEquals(Priority.LOW, t.getPriority());
 
         // IMPORTANT
-        t = U.Todo.fromTodoTxt("(A) Do stuff", null);
+        t = U.Todo.taskFromTodoTxt("(A) Do stuff", null);
         assertNotNull(t);
         assertEquals("Do stuff", t.getDescription());
         assertEquals(Priority.NONE, t.getPriority());
@@ -212,24 +218,24 @@ public class EverythingTest {
     public final void testTodoTxtReadWithProjectsAndContexts() {
         List<TaskList> lol = new ArrayList<TaskList>();
         assertEquals(0, lol.size());
-        Task t = U.Todo.fromTodoTxt("Eat food erryday +Gangsta +Alimentation @lunch @wendys", lol);
+        Task t = U.Todo.taskFromTodoTxt("Eat food erryday +Gangsta +Alimentation @lunch @wendys", lol);
         assertNotNull(t);
         assertEquals(4, lol.size());
         for (TaskList l : lol) {
-            ArrayList<Task> tasks = l.getTasks();
+            List<Task> tasks = l.getTasks();
             assertEquals(1, tasks.size());
             assertEquals(t, tasks.get(0));
         }
 
         boolean a = false, b = false, c = false, d = false;
         for (TaskList l : lol) {
-            if (l.getName().equals("+Gangsta") && l instanceof TaskProject)
+            if (l.getName().equals("Gangsta") && l instanceof TaskProject)
                 a = true;
-            if (l.getName().equals("+Alimentation") && l instanceof TaskProject)
+            if (l.getName().equals("Alimentation") && l instanceof TaskProject)
                 b = true;
-            if (l.getName().equals("@lunch") && l instanceof TaskContext)
+            if (l.getName().equals("lunch") && l instanceof TaskContext)
                 c = true;
-            if (l.getName().equals("@wendys") && l instanceof TaskContext)
+            if (l.getName().equals("wendys") && l instanceof TaskContext)
                 d = true;
         }
         assertEquals(true, a);
@@ -239,7 +245,7 @@ public class EverythingTest {
     }
 
     @Test
-    public final void testTodoTxtWrite() {
+    public final void testTodoTxtWriteBasic() {
         IPersister p = new TodoTxtPersister();
 
         Task task1 = new Task();
@@ -254,31 +260,37 @@ public class EverythingTest {
         task3.setDescription("Tres");
         task3.setGUID(guid);
 
-        TaskList list1 = new TaskList();
+        TaskList list1 = new TaskContext("Jupiter");
         list1.addTask(task1);
-        list1.setName("Jupiter");
+        list1.addTask(task3);
 
-        TaskList list2 = new TaskList();
+        TaskList list2 = new TaskContext(C.EMPTY);
         list2.addTask(task2);
-        list2.addTask(task3);
 
         taskLists.add(list1);
         taskLists.add(list2);
 
-        String expected = new StringBuilder()
-                .append("(F) Uno @Jupiter guid:" + task1.getGUID()).append('\n')
-                .append("(G) x Dos guid:" + task2.getGUID()).append('\n')
-                .append("(G) Tres guid:" + guid).append('\n')
-                .toString();
+        tasks.put(task1.getGUID(), task1);
+        tasks.put(task2.getGUID(), task2);
+        tasks.put(task3.getGUID(), task3);
+
+        String line1 = "(F) Uno @Jupiter guid:" + task1.getGUID() + '\n';
+        String line2 = "x Dos @ guid:" + task2.getGUID();
+        String line3 = "(G) Tres @Jupiter guid:" + guid + '\n';
 
         OutputStream os = new ByteArrayOutputStream();
         try {
-            p.save(os, taskLists);
+            model.taskLists = taskLists;
+            model.tasks = tasks;
+            p.save(os, model);
             os.close();
         } catch (IOException e) {
             Assert.fail(e.toString());
         }
 
-        assertEquals(expected, os.toString());
+        String result = os.toString();
+        assertTrue(result.contains(line1));
+        assertTrue(result.contains(line2));
+        assertTrue(result.contains(line3));
     }
 }

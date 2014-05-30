@@ -5,12 +5,16 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.ListOLists;
+import com.luchenlabs.fantaskulous.model.Task;
+import com.luchenlabs.fantaskulous.model.TaskList;
 
 public class JsonPersister implements IPersister {
 
@@ -35,13 +39,21 @@ public class JsonPersister implements IPersister {
      * @see com.luchenlabs.fantaskulous.IPersister#load(java.io.InputStream)
      */
     @Override
-    public List<TaskList> load(InputStream is) {
+    public FantaskulousModel load(InputStream is) {
         InputStreamReader reader = new InputStreamReader(is);
         Gson gson = new Gson();
         ListOLists lol = gson.fromJson(reader, ListOLists.class);
         if (lol == null)
             return null;
-        return lol.lists;
+        FantaskulousModel model = new FantaskulousModel();
+        model.taskLists = lol.lists;
+        model.tasks = new HashMap<UUID, Task>();
+        for (TaskList l : model.taskLists) {
+            for (Task t : l.getTasks()) {
+                model.tasks.put(t.getGUID(), t);
+            }
+        }
+        return model;
     }
 
     /*
@@ -51,9 +63,9 @@ public class JsonPersister implements IPersister {
      * java.util.ArrayList)
      */
     @Override
-    public void save(OutputStream os, List<TaskList> lists) throws IOException {
+    public void save(OutputStream os, FantaskulousModel model) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(os);
-        writer.write(getJSON(lists));
+        writer.write(getJSON(model.taskLists));
         writer.close();
     }
 }

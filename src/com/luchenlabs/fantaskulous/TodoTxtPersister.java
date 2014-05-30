@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.List;
 
-import com.luchenlabs.fantaskulous.U.Todo;
-import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fantaskulous.model.FantaskulousModel;
+import com.luchenlabs.fantaskulous.model.Task;
 
 public class TodoTxtPersister implements IPersister {
 
@@ -17,15 +16,15 @@ public class TodoTxtPersister implements IPersister {
     }
 
     @Override
-    public List<TaskList> load(InputStream is) {
-        return (Todo.fromTodoTxt(is));
+    public FantaskulousModel load(InputStream is) {
+        return U.Todo.modelFromTodoTxt(is);
     }
 
     @Override
-    public void save(OutputStream os, List<TaskList> lists) throws IOException {
+    public void save(OutputStream os, FantaskulousModel model) throws IOException {
         PrintWriter pw = new PrintWriter(os);
-        for (TaskList l : lists) {
-            pw.append(Todo.toTodoTxt(l));
+        for (Task t : model.tasks.values()) {
+            pw.append(U.Todo.toTodoTxt(t)).append('\n');
         }
         pw.flush();
 
