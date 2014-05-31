@@ -8,7 +8,7 @@ import java.util.Observer;
 import java.util.UUID;
 
 import com.google.gson.annotations.Expose;
-import com.luchenlabs.fantaskulous.C;
+import com.luchenlabs.fantaskulous.core.C;
 
 public class TaskList extends Observable implements Observer, Comparable<TaskList> {
 

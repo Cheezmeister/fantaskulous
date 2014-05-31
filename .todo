@@ -1,5 +1,6 @@
-b dedupe
-    Read todo.txt
+Test deduping on device
+Test guid r/w
+  Read todo.txt
 
 r C into core package
 Change priority alphas to A,B,C,D,E

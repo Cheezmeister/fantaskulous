@@ -1,4 +1,4 @@
-package com.luchenlabs.fantaskulous;
+package com.luchenlabs.fantaskulous.core;
 
 /**
  * Constants

@@ -7,7 +7,7 @@ import java.util.TreeSet;
 import java.util.UUID;
 
 import com.google.gson.annotations.Expose;
-import com.luchenlabs.fantaskulous.C;
+import com.luchenlabs.fantaskulous.core.C;
 
 public class Task extends Observable {
 

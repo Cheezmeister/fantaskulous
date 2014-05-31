@@ -5,8 +5,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+import com.luchenlabs.fantaskulous.core.C;
 import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.Task;
+import com.luchenlabs.fantaskulous.util.U;
 
 public class TodoTxtPersister implements IPersister {
 

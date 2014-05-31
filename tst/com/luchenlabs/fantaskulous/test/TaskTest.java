@@ -10,11 +10,11 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.luchenlabs.fantaskulous.C;
-import com.luchenlabs.fantaskulous.U.Todo;
 import com.luchenlabs.fantaskulous.controller.TaskController;
+import com.luchenlabs.fantaskulous.core.C;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
+import com.luchenlabs.fantaskulous.util.U.Todo;
 
 public class TaskTest {
 

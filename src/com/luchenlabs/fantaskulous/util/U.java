@@ -1,4 +1,4 @@
-package com.luchenlabs.fantaskulous;
+package com.luchenlabs.fantaskulous.util;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
+import com.luchenlabs.fantaskulous.core.C;
 import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.SigillyTaskList;
@@ -32,26 +33,34 @@ public class U {
     /** Utils for todo.txt */
     public static final class Todo {
 
-        private static final String TODO_LOW = "(H) "; //$NON-NLS-1$
-        private static final String TODO_MEDIUM = "(G) "; //$NON-NLS-1$
-        private static final String TODO_HIGH = "(F) "; //$NON-NLS-1$
+        private static final String TODO_LOWEST = "(E) "; //$NON-NLS-1$
+        private static final String TODO_LOW = "(D) "; //$NON-NLS-1$
+        private static final String TODO_MEDIUM = "(C) "; //$NON-NLS-1$
+        private static final String TODO_HIGH = "(B) "; //$NON-NLS-1$
+        private static final String TODO_HIGHEST = "(A) "; //$NON-NLS-1$
         private static final String KEY_GUID = "guid"; //$NON-NLS-1$
 
         static Priority fromAlphaPriority(char letter) {
+            if (letter == TODO_HIGHEST.charAt(1)) { return Priority.HIGHEST; }
             if (letter == TODO_HIGH.charAt(1)) { return Priority.HIGH; }
             if (letter == TODO_MEDIUM.charAt(1)) { return Priority.MEDIUM; }
             if (letter == TODO_LOW.charAt(1)) { return Priority.LOW; }
+            if (letter == TODO_LOWEST.charAt(1)) { return Priority.LOWEST; }
             return Priority.NONE;
         }
 
         private static String getAlphaPriority(Priority p) {
             switch (p) {
+                case HIGHEST:
+                    return TODO_HIGHEST;
                 case HIGH:
                     return TODO_HIGH;
                 case MEDIUM:
                     return TODO_MEDIUM;
                 case LOW:
                     return TODO_LOW;
+                case LOWEST:
+                    return TODO_LOWEST;
                 case NONE:
                 default:
                     return C.EMPTY;
@@ -99,6 +108,7 @@ public class U {
             final String optionalProjects = "((?: \\+[\\w_]+)+)"; //$NON-NLS-1$ 
             final String optionalContexts = "((?: @[\\w_]+)+)"; //$NON-NLS-1$
             // TODO optionalFollowups /YYYY-MM-DD
+            // TODO optionalKeyValuePairs
 
             // Build bigass nasty regex
             Pattern pattern = Pattern.compile(

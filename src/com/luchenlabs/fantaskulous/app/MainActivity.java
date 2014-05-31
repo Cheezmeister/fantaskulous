@@ -26,6 +26,7 @@ import com.google.gson.JsonParseException;
 import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.IPersister;
 import com.luchenlabs.fantaskulous.JsonPersister;
+import com.luchenlabs.fantaskulous.NookOrCranny;
 import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.TodoTxtPersister;
 import com.luchenlabs.fantaskulous.controller.MainController;

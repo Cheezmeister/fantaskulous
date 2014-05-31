@@ -1,6 +1,6 @@
 package com.luchenlabs.fantaskulous.controller;
 
-import com.luchenlabs.fantaskulous.C;
+import com.luchenlabs.fantaskulous.core.C;
 import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
 
