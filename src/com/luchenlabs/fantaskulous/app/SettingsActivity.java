@@ -1,0 +1,35 @@
+package com.luchenlabs.fantaskulous.app;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.preference.PreferenceFragment;
+
+import com.luchenlabs.fantaskulous.R;
+
+/**
+ * App settings
+ * 
+ * @author cheezmeister
+ */
+public class SettingsActivity extends Activity {
+    public static class SettingsFragment extends PreferenceFragment {
+
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            addPreferencesFromResource(R.xml.prefs);
+        }
+
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // Display the fragment as the main content.
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsFragment())
+                .commit();
+    }
+
+}

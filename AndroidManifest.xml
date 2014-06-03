@@ -13,14 +13,19 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        
+        <!-- Home Screen -->
         <activity
             android:name="com.luchenlabs.fantaskulous.app.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <!-- Settings -->
+        <activity android:name="com.luchenlabs.fantaskulous.app.SettingsActivity">
         </activity>
     </application>
 

@@ -30,7 +30,10 @@ import com.luchenlabs.fantaskulous.model.TaskProject;
  */
 public class U {
 
-    /** Utils for todo.txt */
+    /**
+     * Utils for todo.txt
+     * 
+     */
     public static final class Todo {
 
         private static final String TODO_LOWEST = "(E) "; //$NON-NLS-1$
@@ -87,6 +90,12 @@ public class U {
             return model;
         }
 
+        private static void processKeyValue(Task retVal, String key, String value) {
+            if (KEY_GUID.equals(key)) {
+                retVal.setGUID(value);
+            }
+        }
+
         /**
          * Read a line from todo.txt, construct a task and add it to any lists
          * 
@@ -107,8 +116,8 @@ public class U {
             final String text = "(.*?)"; //$NON-NLS-1$
             final String optionalProjects = "((?: \\+[\\w_]+)+)"; //$NON-NLS-1$ 
             final String optionalContexts = "((?: @[\\w_]+)+)"; //$NON-NLS-1$
+            final String optionalKeyValuePairs = "((?: \\w+:\\S+)+)"; //$NON-NLS-1$
             // TODO optionalFollowups /YYYY-MM-DD
-            // TODO optionalKeyValuePairs
 
             // Build bigass nasty regex
             Pattern pattern = Pattern.compile(
@@ -118,7 +127,8 @@ public class U {
                             optionalDate + '?' +
                             text +
                             optionalProjects + '?' +
-                            optionalContexts + '?');
+                            optionalContexts + '?' +
+                            optionalKeyValuePairs + '?');
             Matcher o = pattern.matcher(line);
 
             // Parse the line
@@ -157,6 +167,7 @@ public class U {
             // of lines like "x (A) @office", that's your problem.
             retVal.setDescription(o.group(5));
 
+            // Projects / contexts
             Set<String> projects = new HashSet<String>();
             if (o.group(6) != null && o.group(6).matches(optionalProjects)) {
                 projects.addAll(Arrays.asList(o.group(6).trim().split(C.SPACE)));
@@ -165,7 +176,6 @@ public class U {
             if (o.group(7) != null && o.group(7).matches(optionalContexts)) {
                 contexts.addAll(Arrays.asList(o.group(7).trim().split(C.SPACE)));
             }
-
             // Add task to projects/contexts it belongs to
             if (oLists != null) {
                 for (TaskList list : oLists) {
@@ -190,6 +200,14 @@ public class U {
                     list = new TaskProject(prj.substring(1));
                     list.addTask(retVal);
                     oLists.add(list);
+                }
+            }
+
+            if (o.group(8) != null && o.group(8).matches(optionalKeyValuePairs)) {
+                String[] pairs = o.group(8).trim().split(C.SPACE);
+                for (String pair : pairs) {
+                    String[] parts = pair.split(":"); //$NON-NLS-1$
+                    processKeyValue(retVal, parts[0], parts[1]);
                 }
             }
 

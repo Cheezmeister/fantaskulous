@@ -1,9 +1,8 @@
-Test deduping on device
-Test guid r/w
-  Read todo.txt
-
-r C into core package
-Change priority alphas to A,B,C,D,E
+SDK
+Default (app) or manual location
+  Dropbox cranny
+    Test deduping on device
+      Read todo.txt
 
 ? Importance vs. Urgency
 

@@ -3,7 +3,6 @@ package com.luchenlabs.fantaskulous.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -33,8 +32,6 @@ import com.luchenlabs.fantaskulous.model.Priority;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskContext;
 import com.luchenlabs.fantaskulous.model.TaskList;
-import com.luchenlabs.fantaskulous.model.TaskProject;
-import com.luchenlabs.fantaskulous.util.U;
 
 public class EverythingTest {
 
@@ -171,80 +168,6 @@ public class EverythingTest {
     }
 
     @Test
-    public final void testTodoTxtReadBasicComplete() {
-        Task t = U.Todo.taskFromTodoTxt("x Call mom", null);
-        assertNotNull(t);
-        assertTrue(t.isComplete());
-        assertEquals(Priority.NONE, t.getPriority());
-    }
-
-    @Test
-    public final void testTodoTxtReadBasicIncomplete() {
-        Task t = U.Todo.taskFromTodoTxt("", null);
-        assertNull(t);
-
-        t = U.Todo.taskFromTodoTxt("Do stuff", null);
-        assertNotNull(t);
-        assertEquals("Do stuff", t.getDescription());
-        assertEquals(Priority.NONE, t.getPriority());
-        assertNotNull(t.getGUID());
-    }
-
-    @Test
-    public final void testTodoTxtReadWithPriority() {
-        Task t = U.Todo.taskFromTodoTxt("(F) Do stuff", null);
-        assertNotNull(t);
-        assertEquals("Do stuff", t.getDescription());
-        assertEquals(Priority.HIGH, t.getPriority());
-
-        t = U.Todo.taskFromTodoTxt("(G) Do stuff", null);
-        assertNotNull(t);
-        assertEquals("Do stuff", t.getDescription());
-        assertEquals(Priority.MEDIUM, t.getPriority());
-
-        t = U.Todo.taskFromTodoTxt("(H) Do stuff", null);
-        assertNotNull(t);
-        assertEquals("Do stuff", t.getDescription());
-        assertEquals(Priority.LOW, t.getPriority());
-
-        // IMPORTANT
-        t = U.Todo.taskFromTodoTxt("(A) Do stuff", null);
-        assertNotNull(t);
-        assertEquals("Do stuff", t.getDescription());
-        assertEquals(Priority.NONE, t.getPriority());
-    }
-
-    @Test
-    public final void testTodoTxtReadWithProjectsAndContexts() {
-        List<TaskList> lol = new ArrayList<TaskList>();
-        assertEquals(0, lol.size());
-        Task t = U.Todo.taskFromTodoTxt("Eat food erryday +Gangsta +Alimentation @lunch @wendys", lol);
-        assertNotNull(t);
-        assertEquals(4, lol.size());
-        for (TaskList l : lol) {
-            List<Task> tasks = l.getTasks();
-            assertEquals(1, tasks.size());
-            assertEquals(t, tasks.get(0));
-        }
-
-        boolean a = false, b = false, c = false, d = false;
-        for (TaskList l : lol) {
-            if (l.getName().equals("Gangsta") && l instanceof TaskProject)
-                a = true;
-            if (l.getName().equals("Alimentation") && l instanceof TaskProject)
-                b = true;
-            if (l.getName().equals("lunch") && l instanceof TaskContext)
-                c = true;
-            if (l.getName().equals("wendys") && l instanceof TaskContext)
-                d = true;
-        }
-        assertEquals(true, a);
-        assertEquals(true, b);
-        assertEquals(true, c);
-        assertEquals(true, d);
-    }
-
-    @Test
     public final void testTodoTxtWriteBasic() {
         IPersister p = new TodoTxtPersister();
 
@@ -274,9 +197,9 @@ public class EverythingTest {
         tasks.put(task2.getGUID(), task2);
         tasks.put(task3.getGUID(), task3);
 
-        String line1 = "(F) Uno @Jupiter guid:" + task1.getGUID() + '\n';
+        String line1 = "(B) Uno @Jupiter guid:" + task1.getGUID() + '\n';
         String line2 = "x Dos @ guid:" + task2.getGUID();
-        String line3 = "(G) Tres @Jupiter guid:" + guid + '\n';
+        String line3 = "(C) Tres @Jupiter guid:" + guid + '\n';
 
         OutputStream os = new ByteArrayOutputStream();
         try {
@@ -293,4 +216,5 @@ public class EverythingTest {
         assertTrue(result.contains(line2));
         assertTrue(result.contains(line3));
     }
+
 }
