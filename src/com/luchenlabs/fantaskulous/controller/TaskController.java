@@ -17,8 +17,11 @@ public class TaskController {
 
     public void cyclePriority(Task task) {
         Priority priority = task.getPriority();
-        int newPriority = priority.ordinal() + 1;
-        newPriority %= Priority.values().length;
-        task.setPriority(Priority.values()[newPriority]);
+
+        Priority newPri = priority == Priority.MEDIUM ? Priority.LOW :
+                priority == Priority.LOW ? Priority.HIGH :
+                        Priority.MEDIUM;
+
+        task.setPriority(newPri);
     }
 }

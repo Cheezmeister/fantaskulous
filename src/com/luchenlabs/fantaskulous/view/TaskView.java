@@ -33,17 +33,19 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
      */
     private static int iconForPriority(Priority priority) {
         switch (priority) {
+            case HIGHEST:
+                return R.drawable.ic_priority_highest;
             case HIGH:
-                // case HIGHEST:
                 return R.drawable.ic_priority_high;
             case MEDIUM:
                 return R.drawable.ic_priority_medium;
             case LOW:
-                // case LOWEST:
                 return R.drawable.ic_priority_low;
+            case LOWEST:
+                return R.drawable.ic_priority_lowest;
             case NONE:
             default:
-                return 0;
+                return R.drawable.ic_priority_none;
         }
     }
 
