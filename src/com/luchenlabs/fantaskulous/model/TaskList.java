@@ -11,12 +11,6 @@ import com.luchenlabs.fantaskulous.C;
 
 public class TaskList extends Observable implements Observer {
 
-    public static Task fromTodoTxt(CharSequence todoTxt) {
-        Task t = new Task();
-
-        return t;
-    }
-
     @Expose
     private String name;
     @Expose
