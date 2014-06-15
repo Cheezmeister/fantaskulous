@@ -24,4 +24,5 @@
     <string name="action_backup_export">Backup/Export</string>
     <string name="action_import">Import Tasks</string>
     <string name="export_tasks">Export Tasks</string>
+    <string name="import_tasks">Import Tasks</string>
 </resources>

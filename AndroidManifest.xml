@@ -8,6 +8,10 @@
         android:minSdkVersion="14"
         android:targetSdkVersion="17" />
 
+    <!-- Permissions needed for Dropbox sync -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
@@ -16,7 +20,7 @@
         
         <!-- Home Screen -->
         <activity
-            android:name="com.luchenlabs.fantaskulous.app.MainActivity"
+            android:name=".app.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,8 +29,36 @@
         </activity>
 
         <!-- Settings -->
-        <activity android:name="com.luchenlabs.fantaskulous.app.SettingsActivity">
+        <activity android:name=".app.SettingsActivity" >
         </activity>
+        <activity android:name=".app.IdioticDropboxAuthShimActivity" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+         </activity>
+
+        <!-- Moar Dropbox boilerplate -->
+        <activity android:name="com.dropbox.sync.android.DbxAuthActivity" />
+        <activity
+            android:name="com.dropbox.client2.android.AuthActivity"
+            android:launchMode="singleTask" >
+            <intent-filter>
+                <data android:scheme="db-6gbbec8927grc1r" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name="com.dropbox.sync.android.DbxSyncService"
+            android:enabled="true"
+            android:exported="false"
+            android:label="Dropbox Sync" />
     </application>
 
 </manifest>

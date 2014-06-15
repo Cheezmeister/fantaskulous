@@ -5,6 +5,8 @@ import java.io.OutputStream;
 
 public interface NookOrCranny {
 
+    void cleanup();
+
     InputStream fetchMeAnInputStream();
 
     OutputStream fetchMeAnOutputStream();

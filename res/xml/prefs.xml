@@ -3,16 +3,19 @@
     <PreferenceCategory android:title="Syncing" >
         <CheckBoxPreference
             android:key="prefEnableDropboxSync"
-            android:summary="SUMMRY"
+            android:summary="Requires a Dropbox account"
             android:title="Sync with Dropbox" />
-
-        <PreferenceScreen
-            android:dependency="prefEnableDropboxSync"
-            android:key="prefLaunchDropboxAuth"
-            android:layout="?android:attr/preferenceLayoutChild" >
-            
-            <intent />
-        </PreferenceScreen>
     </PreferenceCategory>
-
+    
+    <PreferenceCategory android:title="Formats" >
+        <CheckBoxPreference
+            android:key="prefWriteJSON"
+            android:summary="Save tasks in JSON format"
+            android:title="JSON" />
+        <CheckBoxPreference
+            android:key="prefWriteTodoTxt"
+            android:summary="Save tasks in todo.txt format"
+            android:title="todo.txt" />
+        </PreferenceCategory>
+    
 </PreferenceScreen>

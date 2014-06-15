@@ -12,16 +12,25 @@ import java.util.UUID;
 
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.dropbox.sync.android.DbxAccountManager;
+import com.dropbox.sync.android.DbxException;
+import com.dropbox.sync.android.DbxException.Unauthorized;
+import com.dropbox.sync.android.DbxFile;
+import com.dropbox.sync.android.DbxFileSystem;
+import com.dropbox.sync.android.DbxPath;
+import com.dropbox.sync.android.DbxPath.InvalidPathException;
 import com.google.gson.JsonParseException;
 import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.IPersister;
@@ -30,6 +39,7 @@ import com.luchenlabs.fantaskulous.NookOrCranny;
 import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.TodoTxtPersister;
 import com.luchenlabs.fantaskulous.controller.MainController;
+import com.luchenlabs.fantaskulous.core.C;
 import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
@@ -37,12 +47,104 @@ import com.luchenlabs.fantaskulous.view.TaskListFragmentPagerAdapter;
 
 public class MainActivity extends AbstractActivity {
 
+    public class DropboxSyncNook implements NookOrCranny {
+
+        private DbxAccountManager _dbxAcctMgr;
+        private final String _filename;
+        private DbxFile _file;
+
+        public DropboxSyncNook(String filename) {
+            this._filename = filename;
+        }
+
+        @Override
+        public void cleanup() {
+            if (_file != null) {
+                _file.close();
+            }
+        }
+
+        @Override
+        public InputStream fetchMeAnInputStream() {
+            _file = findDbxFile();
+            if (_file == null)
+                return null;
+
+            try {
+                return _file.getReadStream();
+            } catch (IOException e) {
+                Log.e(getClass().getSimpleName(), "IoEx: " + e.getMessage()); //$NON-NLS-1$
+            }
+            return null;
+        }
+
+        @Override
+        public OutputStream fetchMeAnOutputStream() {
+            _file = findDbxFile();
+            if (_file == null)
+                return null;
+
+            try {
+                return _file.getWriteStream();
+            } catch (IOException e) {
+                Log.e(getClass().getSimpleName(), "IoEx: " + e.getMessage()); //$NON-NLS-1$
+            }
+
+            return null;
+        }
+
+        private DbxFile findDbxFile() {
+            _dbxAcctMgr = DbxAccountManager.getInstance(getApplicationContext(),
+                    C.DBX_APP_KEY,
+                    C.DBX_APP_SECRET);
+            if (!_dbxAcctMgr.hasLinkedAccount()) {
+                Log.i(getClass().getSimpleName(), "No dropbox account is linked");
+                return null;
+            }
+
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            if (!settings.getBoolean("prefEnableDropboxSync", false))
+                return null;
+
+            DbxFileSystem dbxFs;
+            DbxFile file;
+            try {
+                try {
+                    dbxFs = DbxFileSystem.forAccount(_dbxAcctMgr.getLinkedAccount());
+                } catch (Unauthorized e) {
+                    Log.e(getClass().getSimpleName(), "Unauthorized: " + e.getMessage()); //$NON-NLS-1$
+                    return null;
+                }
+                DbxPath path = new DbxPath(_filename);
+                if (dbxFs.exists(path)) {
+                    file = dbxFs.open(path);
+                } else {
+                    try {
+                        file = dbxFs.create(path);
+                    } catch (InvalidPathException e) {
+                        Log.e(getClass().getSimpleName(), "InvalidPath: " + e.getMessage()); //$NON-NLS-1$
+                        return null;
+                    }
+                }
+            } catch (DbxException e) {
+                Log.e(getClass().getSimpleName(), "DbxEx: " + e.getMessage()); //$NON-NLS-1$
+                return null;
+            }
+            return file;
+        }
+    }
+
     public class FallbackAssetCranny implements NookOrCranny {
 
         private final String _filename;
 
         public FallbackAssetCranny(String filename) {
             this._filename = filename;
+        }
+
+        @Override
+        public void cleanup() {
+            // Nothing to do
         }
 
         @Override
@@ -96,6 +198,8 @@ public class MainActivity extends AbstractActivity {
 
                     try {
                         model = attemptLoad(persister, is);
+                        is.close();
+                        noc.cleanup();
                     } catch (JsonParseException e) {
                         Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
                     } catch (Exception e) {
@@ -138,6 +242,11 @@ public class MainActivity extends AbstractActivity {
         }
 
         @Override
+        public void cleanup() {
+            // Nothing to do
+        }
+
+        @Override
         public InputStream fetchMeAnInputStream() {
             try {
                 return openFileInput(_filename);
@@ -166,9 +275,11 @@ public class MainActivity extends AbstractActivity {
                 String filename = persister.getDefaultFilename();
                 OutputStream os = null;
 
-                NookOrCranny[] nooksAndCrannies = new NookOrCranny[] {
-                        new LocalFileCranny(filename)
-                };
+                NookOrCranny[] nooksAndCrannies = defaultNooksAndCrannies(filename);
+
+//                new NookOrCranny[] {
+//                        new LocalFileCranny(filename)
+//                };
 
                 for (NookOrCranny noc : nooksAndCrannies) {
 
@@ -180,6 +291,7 @@ public class MainActivity extends AbstractActivity {
                     try {
                         persister.save(os, G.getState().getModel());
                         os.close();
+                        noc.cleanup();
                     } catch (IOException e) {
                         Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
                     } catch (Exception e) {
@@ -194,6 +306,8 @@ public class MainActivity extends AbstractActivity {
     }
 
     private static final int CODE_IMPORT = 3456;
+    private static final int CODE_DBX_LINK_ACCOUNT = 7890;
+    private static final int CODE_DBX_CHOOSER = 8484;
 
     private TaskListFragmentPagerAdapter _pagerAdapter;
 
@@ -227,7 +341,8 @@ public class MainActivity extends AbstractActivity {
 
     private NookOrCranny[] defaultNooksAndCrannies(String filename) {
         return new NookOrCranny[] {
-                new LocalFileCranny(filename),
+                new DropboxSyncNook(filename),
+        //                new LocalFileCranny(filename),
         };
     }
 
@@ -255,17 +370,19 @@ public class MainActivity extends AbstractActivity {
     }
 
     private void importFuckJavaKeywords() {
+        String title = getString(R.string.import_tasks);
         Intent get = new Intent(Intent.ACTION_GET_CONTENT);
         get.setType("text/json"); //$NON-NLS-1$
-        startActivityForResult(get, CODE_IMPORT);
+        startActivityForResult(Intent.createChooser(get, title), CODE_IMPORT);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode != CODE_IMPORT)
+
+        if (resultCode != RESULT_OK)
             return;
 
-        if (resultCode == RESULT_OK) {
+        if (requestCode == CODE_IMPORT) {
             Uri uri = data.getData();
             if (uri != null) {
                 ContentResolver cr = getContentResolver();
