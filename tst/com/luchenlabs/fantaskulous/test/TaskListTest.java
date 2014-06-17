@@ -3,6 +3,7 @@
  */
 package com.luchenlabs.fantaskulous.test;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -57,6 +58,14 @@ public class TaskListTest {
     @Test
     public final void testAlwaysHasGuid() {
         assertNotNull(list.getGuid());
+    }
+
+    @Test
+    public void testSetName() {
+        String name = "Bananas";
+        list.setName(name);
+        assertNotNull(list.getName());
+        assertEquals(name, list.getName());
     }
 
     @Test
