@@ -108,4 +108,9 @@ public class Task extends Observable {
         notifyObservers();
     }
 
+    @Override
+    public String toString() {
+        return String.format("(%s) %s", priority, description); //$NON-NLS-1$
+    }
+
 }

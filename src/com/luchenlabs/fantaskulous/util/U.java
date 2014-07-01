@@ -13,6 +13,8 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
+import android.util.Log;
+
 import com.luchenlabs.fantaskulous.core.C;
 import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.Priority;
@@ -36,12 +38,15 @@ public class U {
      */
     public static final class Todo {
 
+        private static final String UNFILED_TITLE = "(Unfiled)";
         private static final String TODO_LOWEST = "(E) "; //$NON-NLS-1$
         private static final String TODO_LOW = "(D) "; //$NON-NLS-1$
         private static final String TODO_MEDIUM = "(C) "; //$NON-NLS-1$
         private static final String TODO_HIGH = "(B) "; //$NON-NLS-1$
         private static final String TODO_HIGHEST = "(A) "; //$NON-NLS-1$
         private static final String KEY_GUID = "guid"; //$NON-NLS-1$
+        private static final String KEY_BLOCKS = "blocks"; //$NON-NLS-1$
+        private static final String KEY_BLOCKED_BY = "blocked_by"; //$NON-NLS-1$
 
         static Priority fromAlphaPriority(char letter) {
             if (letter == TODO_HIGHEST.charAt(1)) { return Priority.HIGHEST; }
@@ -80,6 +85,8 @@ public class U {
                 if (line.length() == 0)
                     continue;
 
+                Log.w("U", "Line: " + line);
+
                 Task task = taskFromTodoTxt(line, model.taskLists);
 
                 // TODO try to preserve input order on write
@@ -93,6 +100,51 @@ public class U {
         private static void processKeyValue(Task retVal, String key, String value) {
             if (KEY_GUID.equals(key)) {
                 retVal.setGUID(value);
+            }
+        }
+
+        private static void resolveLists(List<TaskList> oLists, Task task,
+                Set<String> projects, Set<String> contexts) {
+            boolean unfiled = (projects.size() == 0 && contexts.size() == 0);
+
+            if (unfiled) {
+                TaskList list = null;
+                for (TaskList l : oLists) {
+                    if (l.getName().equals(UNFILED_TITLE)) {
+                        list = l;
+                        break;
+                    }
+                }
+                if (list == null) {
+                    list = new TaskList(UNFILED_TITLE);
+                    oLists.add(list);
+                }
+                list.addTask(task);
+                return;
+            }
+
+            for (TaskList list : oLists) {
+                String name = list.toString();
+                if (projects.contains(name)) {
+                    projects.remove(name);
+                    list.addTask(task);
+                } else if (contexts.contains(name)) {
+                    contexts.remove(name);
+                    list.addTask(task);
+                }
+            }
+
+            // Create any lists we didn't find
+            TaskList list;
+            for (String ctx : contexts) {
+                list = new TaskContext(ctx.substring(1));
+                list.addTask(task);
+                oLists.add(list);
+            }
+            for (String prj : projects) {
+                list = new TaskProject(prj.substring(1));
+                list.addTask(task);
+                oLists.add(list);
             }
         }
 
@@ -178,29 +230,7 @@ public class U {
             }
             // Add task to projects/contexts it belongs to
             if (oLists != null) {
-                for (TaskList list : oLists) {
-                    String name = list.toString();
-                    if (projects.contains(name)) {
-                        projects.remove(name);
-                        list.addTask(retVal);
-                    } else if (contexts.contains(name)) {
-                        contexts.remove(name);
-                        list.addTask(retVal);
-                    }
-                }
-
-                // Create any lists we didn't find
-                TaskList list;
-                for (String ctx : contexts) {
-                    list = new TaskContext(ctx.substring(1));
-                    list.addTask(retVal);
-                    oLists.add(list);
-                }
-                for (String prj : projects) {
-                    list = new TaskProject(prj.substring(1));
-                    list.addTask(retVal);
-                    oLists.add(list);
-                }
+                resolveLists(oLists, retVal, projects, contexts);
             }
 
             if (o.group(8) != null && o.group(8).matches(optionalKeyValuePairs)) {

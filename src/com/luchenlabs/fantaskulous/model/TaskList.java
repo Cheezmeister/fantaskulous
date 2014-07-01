@@ -102,6 +102,11 @@ public class TaskList extends Observable implements Observer, Comparable<TaskLis
         notifyObservers();
     }
 
+    @Override
+    public String toString() {
+        return getName();
+    }
+
     /*
      * (non-Javadoc)
      * 

@@ -1,6 +1,5 @@
 package com.luchenlabs.fantaskulous.app;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -12,34 +11,25 @@ import java.util.UUID;
 
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.dropbox.sync.android.DbxAccountManager;
-import com.dropbox.sync.android.DbxException;
-import com.dropbox.sync.android.DbxException.Unauthorized;
-import com.dropbox.sync.android.DbxFile;
-import com.dropbox.sync.android.DbxFileSystem;
-import com.dropbox.sync.android.DbxPath;
-import com.dropbox.sync.android.DbxPath.InvalidPathException;
 import com.google.gson.JsonParseException;
 import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.IPersister;
 import com.luchenlabs.fantaskulous.JsonPersister;
-import com.luchenlabs.fantaskulous.NookOrCranny;
 import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.TodoTxtPersister;
+import com.luchenlabs.fantaskulous.app.storage.DropboxSyncNook;
+import com.luchenlabs.fantaskulous.app.storage.FallbackAssetCranny;
+import com.luchenlabs.fantaskulous.app.storage.NookOrCranny;
 import com.luchenlabs.fantaskulous.controller.MainController;
-import com.luchenlabs.fantaskulous.core.C;
 import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskList;
@@ -47,176 +37,69 @@ import com.luchenlabs.fantaskulous.view.TaskListFragmentPagerAdapter;
 
 public class MainActivity extends AbstractActivity {
 
-    public class DropboxSyncNook implements NookOrCranny {
+    private class LoadTaskListTask extends AsyncTask<Void, Void, LoadTaskListTask.Result> {
 
-        private DbxAccountManager _dbxAcctMgr;
-        private final String _filename;
-        private DbxFile _file;
+        public class Result {
 
-        public DropboxSyncNook(String filename) {
-            this._filename = filename;
+            public FantaskulousModel model;
+            public NookOrCranny nookOrCranny;
+
         }
 
         @Override
-        public void cleanup() {
-            if (_file != null) {
-                _file.close();
-            }
-        }
-
-        @Override
-        public InputStream fetchMeAnInputStream() {
-            _file = findDbxFile();
-            if (_file == null)
-                return null;
-
-            try {
-                return _file.getReadStream();
-            } catch (IOException e) {
-                Log.e(getClass().getSimpleName(), "IoEx: " + e.getMessage()); //$NON-NLS-1$
-            }
-            return null;
-        }
-
-        @Override
-        public OutputStream fetchMeAnOutputStream() {
-            _file = findDbxFile();
-            if (_file == null)
-                return null;
-
-            try {
-                return _file.getWriteStream();
-            } catch (IOException e) {
-                Log.e(getClass().getSimpleName(), "IoEx: " + e.getMessage()); //$NON-NLS-1$
-            }
-
-            return null;
-        }
-
-        private DbxFile findDbxFile() {
-            _dbxAcctMgr = DbxAccountManager.getInstance(getApplicationContext(),
-                    C.DBX_APP_KEY,
-                    C.DBX_APP_SECRET);
-            if (!_dbxAcctMgr.hasLinkedAccount()) {
-                Log.i(getClass().getSimpleName(), "No dropbox account is linked");
-                return null;
-            }
-
-            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            if (!settings.getBoolean("prefEnableDropboxSync", false))
-                return null;
-
-            DbxFileSystem dbxFs;
-            DbxFile file;
-            try {
-                try {
-                    dbxFs = DbxFileSystem.forAccount(_dbxAcctMgr.getLinkedAccount());
-                } catch (Unauthorized e) {
-                    Log.e(getClass().getSimpleName(), "Unauthorized: " + e.getMessage()); //$NON-NLS-1$
-                    return null;
-                }
-                DbxPath path = new DbxPath(_filename);
-                if (dbxFs.exists(path)) {
-                    file = dbxFs.open(path);
-                } else {
-                    try {
-                        file = dbxFs.create(path);
-                    } catch (InvalidPathException e) {
-                        Log.e(getClass().getSimpleName(), "InvalidPath: " + e.getMessage()); //$NON-NLS-1$
-                        return null;
-                    }
-                }
-            } catch (DbxException e) {
-                Log.e(getClass().getSimpleName(), "DbxEx: " + e.getMessage()); //$NON-NLS-1$
-                return null;
-            }
-            return file;
-        }
-    }
-
-    public class FallbackAssetCranny implements NookOrCranny {
-
-        private final String _filename;
-
-        public FallbackAssetCranny(String filename) {
-            this._filename = filename;
-        }
-
-        @Override
-        public void cleanup() {
-            // Nothing to do
-        }
-
-        @Override
-        public InputStream fetchMeAnInputStream() {
-            try {
-                AssetManager assetManager = getAssets();
-                return assetManager.open(_filename);
-            } catch (IOException e) {
-                Log.wtf(getClass().getSimpleName(), getString(R.string.fmt_not_found, _filename, e));
-            }
-            return null;
-        }
-
-        @Override
-        public OutputStream fetchMeAnOutputStream() {
-            throw new UnsupportedOperationException("Not implemented!"); //$NON-NLS-1$
-        }
-
-    }
-
-    private class LoadTaskListTask extends AsyncTask<Void, Void, FantaskulousModel> {
-
-        private FantaskulousModel attemptLoad(IPersister persister, InputStream is) throws JsonParseException,
-                Exception {
-            if (is != null) { return (persister.load(is)); }
-            return null;
-        }
-
-        @Override
-        protected FantaskulousModel doInBackground(Void... params) {
+        protected Result doInBackground(Void... params) {
             InputStream is = null;
 
             FantaskulousModel model = null;
             for (IPersister persister : persisters) {
                 String filename = persister.getDefaultFilename();
-                Log.i(getClass().getSimpleName(), "Looking for " + filename); //$NON-NLS-1$
+                Log.w(getClass().getSimpleName(), "Looking for " + filename); //$NON-NLS-1$
 
                 // Attempt load first from local, then from assets
                 List<NookOrCranny> nocs = new ArrayList<NookOrCranny>();
                 nocs.addAll(Arrays.asList(defaultNooksAndCrannies(filename)));
-                nocs.add(new FallbackAssetCranny(filename));
+                nocs.add(new FallbackAssetCranny(MainActivity.this, filename));
 
                 for (NookOrCranny noc : nocs) {
 
                     // Open if we can. If something went wrong, bail and fall
                     // back
+                    Log.w(getClass().getSimpleName(), "Trying " + noc);
                     is = noc.fetchMeAnInputStream();
                     if (is == null)
                         continue;
-                    Log.i(getClass().getSimpleName(), "Found a stream"); //$NON-NLS-1$
+                    Log.w(getClass().getSimpleName(), "Found a stream with " + noc); //$NON-NLS-1$
 
                     try {
-                        model = attemptLoad(persister, is);
+                        Log.w(getClass().getSimpleName(), "Attempting to load " + persister.getDefaultFilename());
+                        model = persister.load(is);
+                        Log.w(getClass().getSimpleName(),
+                                String.format("Loaded: %s (%d tasks)", model.toString(), model.tasks.size()));
                         is.close();
-                        noc.cleanup();
                     } catch (JsonParseException e) {
                         Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
                     } catch (Exception e) {
                         Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
                     }
                     if (model != null) {
-                        Log.d(getClass().getSimpleName(), "Success!"); //$NON-NLS-1$
-                        return model;
+                        Log.w(getClass().getSimpleName(), "Success!"); //$NON-NLS-1$
+                        Result result = new Result();
+                        result.model = model;
+                        result.nookOrCranny = noc;
+                        return result;
                     }
 
-                    Log.d(getClass().getSimpleName(), "Error reading " + filename); //$NON-NLS-1$
+                    Log.w(getClass().getSimpleName(), "Error reading " + filename); //$NON-NLS-1$
                 }
             }
+            Log.wtf(getClass().getSimpleName(), "Couldn't load a blasted thing!"); //$NON-NLS-1$
             model = new FantaskulousModel();
             model.taskLists = new ArrayList<TaskList>();
             model.tasks = new HashMap<UUID, Task>();
-            return model;
+            Result result = new Result();
+            result.model = model;
+            result.nookOrCranny = null;
+            return result;
         }
 
         /*
@@ -225,46 +108,12 @@ public class MainActivity extends AbstractActivity {
          * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
          */
         @Override
-        protected void onPostExecute(FantaskulousModel result) {
+        protected void onPostExecute(Result result) {
             super.onPostExecute(result);
 
             handleFinishedLoading(result);
         }
 
-    }
-
-    public class LocalFileCranny implements NookOrCranny {
-
-        private final String _filename;
-
-        public LocalFileCranny(String filename) {
-            this._filename = filename;
-        }
-
-        @Override
-        public void cleanup() {
-            // Nothing to do
-        }
-
-        @Override
-        public InputStream fetchMeAnInputStream() {
-            try {
-                return openFileInput(_filename);
-            } catch (FileNotFoundException e) {
-                Log.w(getClass().getSimpleName(), getString(R.string.fmt_not_found, _filename, e));
-            }
-            return null;
-        }
-
-        @Override
-        public OutputStream fetchMeAnOutputStream() {
-            try {
-                return openFileOutput(_filename, MODE_PRIVATE);
-            } catch (FileNotFoundException e) {
-                Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, _filename, e));
-            }
-            return null;
-        }
     }
 
     private class SaveTaskListTask extends AsyncTask<List<TaskList>, Void, Void> {
@@ -310,12 +159,10 @@ public class MainActivity extends AbstractActivity {
     private static final int CODE_DBX_CHOOSER = 8484;
 
     private TaskListFragmentPagerAdapter _pagerAdapter;
-
     private ViewPager _viewPager;
-
     private View _spinner;
-
     private MainController _controller;
+    private NookOrCranny _dataSource;
 
     private final IPersister[] persisters = {
             new TodoTxtPersister(),
@@ -341,14 +188,13 @@ public class MainActivity extends AbstractActivity {
 
     private NookOrCranny[] defaultNooksAndCrannies(String filename) {
         return new NookOrCranny[] {
-                new DropboxSyncNook(filename),
+                new DropboxSyncNook(this, filename),
         //                new LocalFileCranny(filename),
         };
     }
 
     private void export() {
-        Intent send = new Intent();
-        send.setAction(Intent.ACTION_SEND);
+        Intent send = new Intent(Intent.ACTION_SEND);
         FantaskulousModel model = G.getState().getModel();
         if (model == null) {
             Log.wtf(getClass().getSimpleName(), "No model found"); //$NON-NLS-1$
@@ -358,15 +204,27 @@ public class MainActivity extends AbstractActivity {
         startActivity(Intent.createChooser(send, getString(R.string.export_tasks)));
     }
 
-    private void finishOnCreate() {
-        _spinner.setVisibility(View.GONE);
+    private void finishOnStart(FantaskulousModel model) {
         _controller = G.getState().getMainController();
-        refresh();
+
+        handleNewDataLoaded(model);
+
+        _viewPager.setVisibility(View.VISIBLE);
+        _spinner.setVisibility(View.GONE);
     }
 
-    private void handleFinishedLoading(FantaskulousModel model) {
+    private void handleFinishedLoading(LoadTaskListTask.Result result) {
+        FantaskulousModel model = result.model;
+        _dataSource = result.nookOrCranny;
+        finishOnStart(model);
+    }
+
+    private void handleNewDataLoaded(FantaskulousModel model) {
         G.getState().setModel(model);
-        finishOnCreate();
+        _pagerAdapter = new TaskListFragmentPagerAdapter(
+                getSupportFragmentManager());
+        _viewPager.setAdapter(_pagerAdapter);
+        refresh();
     }
 
     private void importFuckJavaKeywords() {
@@ -390,7 +248,7 @@ public class MainActivity extends AbstractActivity {
                     InputStream is = cr.openInputStream(uri);
                     IPersister persister = new JsonPersister();
                     // TODO import todo.txt
-                    this.handleFinishedLoading(persister.load(is));
+                    this.handleNewDataLoaded(persister.load(is));
                 } catch (IOException e) {
                     Log.e(getClass().getSimpleName(), "Importing failed", e); //$NON-NLS-1$
                 }
@@ -405,20 +263,6 @@ public class MainActivity extends AbstractActivity {
         _spinner = findViewById(R.id.spinner);
         _viewPager = (ViewPager) findViewById(R.id.pager);
 
-        _pagerAdapter = new TaskListFragmentPagerAdapter(
-                getSupportFragmentManager());
-
-        _viewPager.setAdapter(_pagerAdapter);
-
-        FantaskulousModel model = G.getState().getModel();
-        if (model == null) {
-            _spinner.setVisibility(View.VISIBLE);
-            Log.i(getClass().getSimpleName(), "Kicking off load task"); //$NON-NLS-1$
-            new LoadTaskListTask().execute();
-        } else {
-            Log.i(getClass().getSimpleName(), "Finishing on create with " + model.taskLists.size() + "lists"); //$NON-NLS-1$ //$NON-NLS-2$
-            finishOnCreate();
-        }
     }
 
     @Override
@@ -459,6 +303,22 @@ public class MainActivity extends AbstractActivity {
                 break;
         }
         return super.onMenuItemSelected(featureId, item);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FantaskulousModel model = G.getState().getModel();
+        if (model == null) {
+            _spinner.setVisibility(View.VISIBLE);
+            Log.i(getClass().getSimpleName(), "Kicking off load task"); //$NON-NLS-1$
+            new LoadTaskListTask().execute();
+        } else {
+            Log.i(getClass().getSimpleName(), "Finishing onStart with " + model.taskLists.size() + "lists"); //$NON-NLS-1$ //$NON-NLS-2$
+            finishOnStart(model);
+            _dataSource.begAndPleadToBloodyUpdateTheDamnFile();
+            // beg and plead to bloody update the damn file
+        }
     }
 
     /*
