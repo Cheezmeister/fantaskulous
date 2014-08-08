@@ -1,5 +1,6 @@
 package com.luchenlabs.fantaskulous;
 
+import com.luchenlabs.fantaskulous.app.storage.NookOrCranny;
 import com.luchenlabs.fantaskulous.controller.MainController;
 import com.luchenlabs.fantaskulous.controller.TaskController;
 import com.luchenlabs.fantaskulous.controller.TaskListController;
@@ -15,6 +16,7 @@ public class G {
     public static class State {
 
         private FantaskulousModel model;
+        private NookOrCranny dataSource;
 
         private final MainController mainController;
         private final TaskListController taskListController;
@@ -27,6 +29,10 @@ public class G {
             this.mainController = new MainController();
             this.taskListController = new TaskListController();
             this.taskController = new TaskController();
+        }
+
+        public NookOrCranny getDataSource() {
+            return this.dataSource;
         }
 
         /**
@@ -55,6 +61,15 @@ public class G {
          */
         public TaskListController getTaskListController() {
             return taskListController;
+        }
+
+        /**
+         * Set the data source we loaded from
+         * 
+         * @param nookOrCranny
+         */
+        public void setDataSource(NookOrCranny nookOrCranny) {
+            this.dataSource = nookOrCranny;
         }
 
         /**

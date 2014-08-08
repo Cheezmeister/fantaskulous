@@ -25,30 +25,27 @@ public class DropboxSyncNook implements NookOrCranny {
 
     private final class FileDownloadedListener implements DbxFile.Listener {
         @Override
-        public void onFileChange(DbxFile file) {
+        public void onFileChange(final DbxFile file) {
             try {
-                if (file.getSyncStatus().isLatest) {
-                    _mainActivity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String text = "New file downloaded, but not doing anything with it";
-                            Toast.makeText(_mainActivity,
-                                    text, Toast.LENGTH_SHORT).show();
-                            ;
-                        }
-                    });
+                DbxFileStatus syncStatus = file.getSyncStatus();
+                if (syncStatus.isLatest) {
+                    sendUpdate(file);
+                    file.removeListener(this);
                 }
             } catch (DbxException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         }
+
     }
 
     private final Activity _mainActivity;
+
     private DbxAccountManager _dbxAcctMgr;
     private final String _filename;
-    private DbxFile _file;
+    // FIXME json and todo.txt nooks will fight over this
+    private static DbxFile _file;
     private final Listener _listener = new FileDownloadedListener();
 
     public DropboxSyncNook(Activity mainActivity, String filename) {
@@ -57,10 +54,47 @@ public class DropboxSyncNook implements NookOrCranny {
     }
 
     @Override
+    public void begAndPleadToBloodyUpdateTheDamnFile() {
+        try {
+            if (_file == null) {
+                _file = findDbxFile(false);
+            }
+            if (_file == null)
+                return;
+
+            if (_file.update()) {
+                sendUpdate(_file);
+            } else if (!_file.getSyncStatus().isLatest) {
+                final String text;
+                if (_file.getNewerStatus().bytesTransferred > 0) {
+                    // Currently downloading
+                    text = "Dropbox file is stale, waiting for new version";
+                } else {
+                    text = "Newer version, but no download in progress, grr.";
+                }
+                _mainActivity.runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        Toast.makeText(_mainActivity, text, Toast.LENGTH_SHORT).show();
+                    }
+
+                });
+                _file.addListener(_listener);
+            }
+        } catch (DbxException e) {
+            // TODO 
+            Log.e(getClass().getSimpleName(), e.getMessage());
+        }
+
+    }
+
+    @Override
     public void cleanup() {
         if (_file != null) {
             _file.removeListener(_listener);
             _file.close();
+            _file = null;
         }
     }
 
@@ -68,10 +102,16 @@ public class DropboxSyncNook implements NookOrCranny {
     public InputStream fetchMeAnInputStream() {
 
         if (_file == null)
-            _file = findDbxFile();
+            _file = findDbxFile(false);
 
         if (_file == null)
             return null;
+        try {
+            _file.update();
+        } catch (DbxException e1) {
+            // We tried
+            Log.wtf(getClass().getSimpleName(), e1.getMessage());
+        }
 
         try {
             return _file.getReadStream();
@@ -83,9 +123,19 @@ public class DropboxSyncNook implements NookOrCranny {
 
     @Override
     public OutputStream fetchMeAnOutputStream() {
-        _file = findDbxFile();
+        if (_file == null) {
+            Log.wtf("Finding file", "Finding file");
+            _file = findDbxFile(true);
+        }
+
         if (_file == null)
             return null;
+
+        try {
+            _file.update();
+        } catch (DbxException e1) {
+            // We tried
+        }
 
         try {
             return _file.getWriteStream();
@@ -96,7 +146,7 @@ public class DropboxSyncNook implements NookOrCranny {
         return null;
     }
 
-    private DbxFile findDbxFile() {
+    private DbxFile findDbxFile(boolean create) {
         _dbxAcctMgr = DbxAccountManager.getInstance(_mainActivity.getApplicationContext(),
                 C.DBX_APP_KEY,
                 C.DBX_APP_SECRET);
@@ -105,6 +155,7 @@ public class DropboxSyncNook implements NookOrCranny {
             return null;
         }
 
+        // TODO don't directly talk to prefs
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(_mainActivity
                 .getApplicationContext());
         if (!settings.getBoolean("prefEnableDropboxSync", false))
@@ -131,30 +182,24 @@ public class DropboxSyncNook implements NookOrCranny {
                 }
             }
 
-//            file.addListener(_listener);
-            DbxFileStatus syncStatus = file.getSyncStatus();
-            if (!syncStatus.isLatest) {
-                if (file.getNewerStatus().bytesTransferred > 0) {
-                    // Currently downloading
-                    _mainActivity.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            String text = "Dropbox file is stale, waiting for new version";
-                            Toast.makeText(_mainActivity, text, Toast.LENGTH_SHORT).show();
-                            ;
-                        }
-
-                    });
-                    return null;
-                }
-            }
-
         } catch (DbxException e) {
             Log.e(getClass().getSimpleName(), "DbxEx: " + e.getMessage()); //$NON-NLS-1$
             return null;
         }
 
         return file;
+    }
+
+    private void sendUpdate(final DbxFile file) {
+        _mainActivity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                // TODO reload and handleNewDataLoaded
+                String text = "New file downloaded, but not doing anything with it: " + file.toString();
+                Toast.makeText(_mainActivity,
+                        text, Toast.LENGTH_SHORT).show();
+                ;
+            }
+        });
     }
 }

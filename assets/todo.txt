@@ -1,0 +1,5 @@
+milk @groceries
+butter @groceries
+eggs @groceries
+vacuum @home
+trash @home

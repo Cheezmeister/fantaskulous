@@ -24,6 +24,11 @@ public class FallbackAssetCranny implements NookOrCranny {
     }
 
     @Override
+    public void begAndPleadToBloodyUpdateTheDamnFile() {
+        // Nothing to do
+    }
+
+    @Override
     public void cleanup() {
         // Nothing to do
     }

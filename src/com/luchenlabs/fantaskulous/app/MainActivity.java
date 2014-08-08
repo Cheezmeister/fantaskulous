@@ -104,7 +104,7 @@ public class MainActivity extends AbstractActivity {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
          */
         @Override
@@ -162,11 +162,10 @@ public class MainActivity extends AbstractActivity {
     private ViewPager _viewPager;
     private View _spinner;
     private MainController _controller;
-    private NookOrCranny _dataSource;
 
     private final IPersister[] persisters = {
             new TodoTxtPersister(),
-            new JsonPersister(),
+            //            new JsonPersister(),
     };
 
     private void createList() {
@@ -215,7 +214,7 @@ public class MainActivity extends AbstractActivity {
 
     private void handleFinishedLoading(LoadTaskListTask.Result result) {
         FantaskulousModel model = result.model;
-        _dataSource = result.nookOrCranny;
+        G.getState().setDataSource(result.nookOrCranny);
         finishOnStart(model);
     }
 
@@ -273,7 +272,7 @@ public class MainActivity extends AbstractActivity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.support.v4.app.FragmentActivity#onMenuItemSelected(int,
      * android.view.MenuItem)
      */
@@ -316,14 +315,13 @@ public class MainActivity extends AbstractActivity {
         } else {
             Log.i(getClass().getSimpleName(), "Finishing onStart with " + model.taskLists.size() + "lists"); //$NON-NLS-1$ //$NON-NLS-2$
             finishOnStart(model);
-            _dataSource.begAndPleadToBloodyUpdateTheDamnFile();
-            // beg and plead to bloody update the damn file
+            G.getState().getDataSource().begAndPleadToBloodyUpdateTheDamnFile();
         }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.support.v4.app.FragmentActivity#onStop()
      */
     @Override
