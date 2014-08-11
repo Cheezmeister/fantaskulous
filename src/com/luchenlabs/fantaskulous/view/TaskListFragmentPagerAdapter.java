@@ -28,7 +28,7 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
         FantaskulousModel model = G.getState().getModel();
         if (model == null)
             return 0;
-        Log.v(getClass().getSimpleName(), "getCount called, giving " + model.taskLists.size()); //$NON-NLS-1$
+//        Log.v(getClass().getSimpleName(), "getCount called, giving " + model.taskLists.size()); //$NON-NLS-1$
         return model.taskLists.size();
     }
 
@@ -58,7 +58,7 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * android.support.v4.view.PagerAdapter#getItemPosition(java.lang.Object)
      */
@@ -75,7 +75,7 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
 
     /**
      * Open up a new list that the user has created
-     * 
+     *
      * @param list
      */
     public void presentNewList(TaskList list) {

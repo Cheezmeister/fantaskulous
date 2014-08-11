@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.luchenlabs.fantaskulous.view;
 
@@ -32,7 +32,7 @@ import com.luchenlabs.fantaskulous.model.TaskList;
 
 /**
  * @author cheezmeister
- * 
+ *
  */
 public class TaskListView extends RelativeLayout implements Observer, FView<TaskList> {
 
@@ -83,7 +83,7 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
                 if (actionId == EditorInfo.IME_ACTION_DONE ||
                         (event != null && event.getAction() == KeyEvent.ACTION_DOWN)) {
-                    getController().addTask(_taskList, text);
+                    getController().addTask(G.getState().getModel(), _taskList, text);
                     fieldDescription.clearComposingText();
                     fieldDescription.setText(null);
 
@@ -123,7 +123,7 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.view.View#onDetachedFromWindow()
      */
     @Override
@@ -134,7 +134,7 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.view.View#onFinishInflate()
      */
     @Override

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.luchenlabs.fantaskulous.test;
 
@@ -11,13 +11,14 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.luchenlabs.fantaskulous.controller.TaskListController;
+import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskContext;
 import com.luchenlabs.fantaskulous.model.TaskList;
 
 /**
  * @author cheezmeister
- * 
+ *
  */
 @SuppressWarnings("nls")
 public class TaskListTest {
@@ -51,8 +52,11 @@ public class TaskListTest {
      */
     @Test
     public final void testAddTask() {
-        Task t = parent.addTask(list, "this is a task");
+        FantaskulousModel model = new FantaskulousModel();
+        Task t = parent.addTask(model, list, "this is a task");
         assertNotNull(t);
+        assertTrue(list.getTasks().contains(t));
+        assertTrue(model.tasks.containsValue(t));
     }
 
     @Test
@@ -61,16 +65,16 @@ public class TaskListTest {
     }
 
     @Test
+    public final void testSanity() {
+        // Yay!
+    }
+
+    @Test
     public void testSetName() {
         String name = "Bananas";
         list.setName(name);
         assertNotNull(list.getName());
         assertEquals(name, list.getName());
-    }
-
-    @Test
-    public final void testSanity() {
-        // Yay!
     }
 
 }

@@ -66,7 +66,7 @@ public class EverythingTest {
     public final void testCleanupWithOneCompletedTask() {
         TaskList list = controller.createTaskList(taskLists, NAME);
         TaskListController tlc = new TaskListController();
-        Task task = tlc.addTask(list, "This is a dummy task");
+        Task task = tlc.addTask(model, list, "This is a dummy task");
         List<Task> tasks = list.getTasks();
 
         controller.removeAllCompletedTasks(taskLists);
@@ -81,9 +81,9 @@ public class EverythingTest {
     public final void testCleanupWithTwoCompletedTasks() {
         TaskList list = controller.createTaskList(taskLists, NAME);
         TaskListController tlc = new TaskListController();
-        tlc.addTask(list, "I'm complete").setComplete(true);
-        tlc.addTask(list, "I'm complete too").setComplete(true);
-        tlc.addTask(list, "I'm incomplete");
+        tlc.addTask(model, list, "I'm complete").setComplete(true);
+        tlc.addTask(model, list, "I'm complete too").setComplete(true);
+        tlc.addTask(model, list, "I'm incomplete");
 
         List<Task> tasks = list.getTasks();
         assertEquals(3, tasks.size());
