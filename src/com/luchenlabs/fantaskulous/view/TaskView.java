@@ -27,7 +27,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
 
     /**
      * Simple map from {@link Priority} to drawable
-     * 
+     *
      * @param priority
      * @return the priority icon if one exists, else 0
      */
@@ -87,7 +87,8 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
         lblDesc.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                setEditModeState(true);
+                // TODO make this work?
+//                setEditModeState(true);
             }
         });
 
@@ -119,7 +120,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.view.View#onAttachedToWindow()
      */
     @Override
@@ -132,7 +133,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.view.View#onDetachedFromWindow()
      */
     @Override
@@ -145,7 +146,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.view.View#onFinishInflate()
      */
     @Override
@@ -171,9 +172,9 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
     /**
      * Toggle between displaying a {@link TextView} and {@link EditText} to
      * allow user to edit the title in place.
-     * 
+     *
      * This is kind of hackish.
-     * 
+     *
      * @param editing
      */
     private void setEditModeState(boolean editing) {

@@ -3,10 +3,10 @@
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
-        android:showAsAction="never"
+        android:showAsAction="never" android:visible="false"
         android:title="@string/action_settings"/>
     <item
-        android:id="@+id/action_move"
+        android:id="@+id/action_move" android:visible="false"
         android:orderInCategory="50"
         android:showAsAction="never"
         android:title="@string/action_move_to_list"/>
@@ -30,16 +30,16 @@
         android:title="@string/action_refresh"/>
     <item
         android:id="@+id/action_cleanup"
-        android:orderInCategory="100"
+        android:orderInCategory="100" android:visible="false"
         android:showAsAction="never"
         android:title="@string/action_cleanup"/>
     <item
-        android:id="@+id/action_backup"
+        android:id="@+id/action_backup" 
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/action_backup_export"/>
     <item
-        android:id="@+id/action_import"
+        android:id="@+id/action_import" android:visible="false"
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/action_import"/>

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.luchenlabs.fantaskulous.view;
 
@@ -17,7 +17,6 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -31,7 +30,7 @@ import com.luchenlabs.fantaskulous.model.TaskList;
 
 /**
  * @author cheezmeister
- * 
+ *
  */
 public class TaskListView extends RelativeLayout implements Observer, FView<TaskList> {
 
@@ -101,15 +100,16 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
             }
         });
 
-        _listView.setOnItemLongClickListener(new OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                Task task = (Task) parent.getItemAtPosition(position);
-                G.getState().getMainController()
-                        .moveTaskToNextList(task, _taskList, G.getState().getTaskLists());
-                return true;
-            }
-        });
+        // _listView.setOnItemLongClickListener(new OnItemLongClickListener() {
+        // @Override
+        // public boolean onItemLongClick(AdapterView<?> parent, View view, int
+        // position, long id) {
+        // Task task = (Task) parent.getItemAtPosition(position);
+        // G.getState().getMainController()
+        // .moveTaskToNextList(task, _taskList, G.getState().getTaskLists());
+        // return true;
+        // }
+        // });
 
     }
 
@@ -121,7 +121,7 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.view.View#onDetachedFromWindow()
      */
     @Override
@@ -132,7 +132,7 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.view.View#onFinishInflate()
      */
     @Override

@@ -57,7 +57,7 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * android.support.v4.view.PagerAdapter#getItemPosition(java.lang.Object)
      */
@@ -73,7 +73,7 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
 
     /**
      * Open up a new list that the user has created
-     * 
+     *
      * @param list
      */
     public void presentNewList(TaskList list) {
@@ -83,6 +83,9 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
 
     public void refresh() {
         notifyDataSetChanged();
+        List<TaskList> taskLists = G.getState().getTaskLists();
+        boolean listWasRemoved = _fragments.size() != taskLists.size();
+        // TODO remove/disable orphaned fragment
         for (TaskListFragment fragment : _fragments) {
             fragment.refresh();
         }
