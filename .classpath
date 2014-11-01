@@ -12,11 +12,7 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="libs/dropbox-android-sdk-1.6.1.jar" sourcepath="dist/dropbox-android-sdk-1.6.1"/>
-	<classpathentry kind="lib" path="libs/bcprov-jdk16-146.jar"/>
-	<classpathentry kind="lib" path="libs/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="libs/httpclient-4.0.3.jar"/>
-	<classpathentry kind="lib" path="libs/httpmime-4.0.3.jar"/>
-	<classpathentry kind="lib" path="libs/httpcore-4.0.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="/home/cheezmeister/workspace/fantaskulous/libs/dropbox-android-sdk-1.6.1.jar"/>
+	<classpathentry kind="lib" path="libs/json_simple-1.1.jar"/>
+	<classpathentry kind="lib" path="org.eclipse.jdt.annotation_1.1.0.v20140129-1625.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

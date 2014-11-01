@@ -77,4 +77,14 @@ public class TaskListTest {
         assertEquals(name, list.getName());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetNameWithEmpty() {
+        list.setName("");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetNameWithNull() {
+        list.setName(null);
+    }
+
 }
