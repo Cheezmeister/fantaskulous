@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 
 import com.luchenlabs.fantaskulous.G;
@@ -21,6 +22,16 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
     public TaskListFragmentPagerAdapter(FragmentManager fm) {
         super(fm);
         _fragments = new ArrayList<TaskListFragment>(10);
+    }
+
+    public void destroyItem(ViewPager viewPager, int position) {
+        try {
+            Fragment frag = _fragments.get(position);
+            super.destroyItem(viewPager, position, frag);
+            _fragments.remove(frag);
+        } catch (IndexOutOfBoundsException e) {
+            throw new IllegalArgumentException("fragment " + position, e); //$NON-NLS-1$
+        }
     }
 
     @Override

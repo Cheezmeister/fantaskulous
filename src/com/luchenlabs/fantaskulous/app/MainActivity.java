@@ -32,94 +32,6 @@ import com.luchenlabs.fantaskulous.view.TaskListFragmentPagerAdapter;
 
 public class MainActivity extends AbstractActivity {
 
-    private class LoadTaskListTask extends AsyncTask<Void, Void, List<TaskList>> {
-        String filename = C.TASK_FILE;
-
-        private List<TaskList> attemptLoad(InputStream is) {
-            if (is != null) {
-                try {
-                    return persister.load(is);
-                } catch (JsonParseException e) {
-                    Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
-                } catch (Exception e) {
-                    Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected List<TaskList> doInBackground(Void... params) {
-            InputStream is = null;
-            try {
-                is = openFileInput(filename);
-            } catch (FileNotFoundException e) {
-                Log.w(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename, e));
-            }
-            List<TaskList> lists = null;
-
-            lists = attemptLoad(is);
-
-            if (lists != null)
-                return lists;
-
-            try {
-                AssetManager assetManager = getAssets();
-                is = assetManager.open(filename);
-            } catch (IOException e) {
-                Log.wtf(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename, e));
-            }
-
-            lists = attemptLoad(is);
-
-            if (lists == null)
-                return new ArrayList<TaskList>();
-
-            return lists;
-        }
-
-        /*
-         * (non-Javadoc)
-         * 
-         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
-         */
-        @Override
-        protected void onPostExecute(List<TaskList> result) {
-            super.onPostExecute(result);
-
-            handleTasksLoaded(result);
-        }
-
-    }
-
-    private class SaveTaskListTask extends AsyncTask<List<TaskList>, Void, Void> {
-
-        @Override
-        protected Void doInBackground(List<TaskList>... params) {
-            String filename = C.TASK_FILE;
-            OutputStream os = null;
-
-            try {
-                os = openFileOutput(filename, MODE_PRIVATE);
-            } catch (FileNotFoundException e) {
-                Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
-            }
-
-            ArrayList<TaskList> lists = new ArrayList<TaskList>(params[0]);
-
-            try {
-                persister.save(os, lists);
-                os.close();
-            } catch (IOException e) {
-                Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
-            } catch (Exception e) {
-                Log.wtf(getClass().getSimpleName(), String.format("Unexpected exception %s", e.toString())); //$NON-NLS-1$
-            }
-            return null;
-        }
-
-    }
-
     private static final int CODE_IMPORT = 3456;
 
     private TaskListFragmentPagerAdapter _pagerAdapter;
@@ -146,6 +58,16 @@ public class MainActivity extends AbstractActivity {
                         }
                     }
                 });
+    }
+
+    private void deleteCurrentList() {
+        int position = _viewPager.getCurrentItem();
+        CharSequence name = _pagerAdapter.getPageTitle(position);
+        if (_controller.removeTaskList(G.getState().getTaskLists(), name)) {
+            _pagerAdapter.destroyItem(_viewPager, position);
+            _viewPager.setAdapter(_pagerAdapter);
+            refresh();
+        }
     }
 
     private void export() {
@@ -226,7 +148,7 @@ public class MainActivity extends AbstractActivity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.support.v4.app.FragmentActivity#onMenuItemSelected(int,
      * android.view.MenuItem)
      */
@@ -237,7 +159,7 @@ public class MainActivity extends AbstractActivity {
                 createList();
                 break;
             case R.id.action_remove:
-                removeList();
+                deleteCurrentList();
                 break;
             case R.id.action_refresh:
                 refresh();
@@ -257,7 +179,7 @@ public class MainActivity extends AbstractActivity {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.support.v4.app.FragmentActivity#onStop()
      */
     @Override
@@ -271,20 +193,100 @@ public class MainActivity extends AbstractActivity {
         _pagerAdapter.refresh();
     }
 
-    private void removeList() {
-        int position = _viewPager.getCurrentItem();
-        CharSequence name = _pagerAdapter.getPageTitle(position);
-        _controller.removeTaskList(G.getState().getTaskLists(), name);
-        refresh();
-        _viewPager.setAdapter(_pagerAdapter);
-    }
-
     @SuppressWarnings("unchecked")
     private void saveTasks() {
         List<TaskList> taskLists = G.getState().getTaskLists();
         if (taskLists != null) {
             new SaveTaskListTask().execute(taskLists);
         }
+    }
+
+    private class LoadTaskListTask extends AsyncTask<Void, Void, List<TaskList>> {
+        String filename = C.TASK_FILE;
+
+        private List<TaskList> attemptLoad(InputStream is) {
+            if (is != null) {
+                try {
+                    return persister.load(is);
+                } catch (JsonParseException e) {
+                    Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
+                } catch (Exception e) {
+                    Log.e(getClass().getSimpleName(), ex(e, R.string.fmt_invalid_json, filename));
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected List<TaskList> doInBackground(Void... params) {
+            InputStream is = null;
+            try {
+                is = openFileInput(filename);
+            } catch (FileNotFoundException e) {
+                Log.w(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename, e));
+            }
+            List<TaskList> lists = null;
+
+            lists = attemptLoad(is);
+
+            if (lists != null)
+                return lists;
+
+            try {
+                AssetManager assetManager = getAssets();
+                is = assetManager.open(filename);
+            } catch (IOException e) {
+                Log.wtf(getClass().getSimpleName(), getString(R.string.fmt_not_found, filename, e));
+            }
+
+            lists = attemptLoad(is);
+
+            if (lists == null)
+                return new ArrayList<TaskList>();
+
+            return lists;
+        }
+
+        /*
+         * (non-Javadoc)
+         *
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         */
+        @Override
+        protected void onPostExecute(List<TaskList> result) {
+            super.onPostExecute(result);
+
+            handleTasksLoaded(result);
+        }
+
+    }
+
+    private class SaveTaskListTask extends AsyncTask<List<TaskList>, Void, Void> {
+
+        @Override
+        protected Void doInBackground(List<TaskList>... params) {
+            String filename = C.TASK_FILE;
+            OutputStream os = null;
+
+            try {
+                os = openFileOutput(filename, MODE_PRIVATE);
+            } catch (FileNotFoundException e) {
+                Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
+            }
+
+            ArrayList<TaskList> lists = new ArrayList<TaskList>(params[0]);
+
+            try {
+                persister.save(os, lists);
+                os.close();
+            } catch (IOException e) {
+                Log.e(getClass().getSimpleName(), getString(R.string.fmt_access_denied, filename, e));
+            } catch (Exception e) {
+                Log.wtf(getClass().getSimpleName(), String.format("Unexpected exception %s", e.toString())); //$NON-NLS-1$
+            }
+            return null;
+        }
+
     }
 
 }
