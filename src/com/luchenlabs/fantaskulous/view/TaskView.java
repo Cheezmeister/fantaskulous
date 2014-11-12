@@ -27,7 +27,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
 
     /**
      * Simple map from {@link Priority} to drawable
-     * 
+     *
      * @param priority
      * @return the priority icon if one exists, else 0
      */
@@ -119,7 +119,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.view.View#onAttachedToWindow()
      */
     @Override
@@ -132,7 +132,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.view.View#onDetachedFromWindow()
      */
     @Override
@@ -145,7 +145,7 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see android.view.View#onFinishInflate()
      */
     @Override
@@ -171,35 +171,33 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
     /**
      * Toggle between displaying a {@link TextView} and {@link EditText} to
      * allow user to edit the title in place.
-     * 
+     *
      * This is kind of hackish.
-     * 
+     *
      * @param editing
      */
     private void setEditModeState(boolean editing) {
         findViewById(R.id.lblDesc).setVisibility(editing ? View.GONE : View.VISIBLE);
         EditText editText = (EditText) findViewById(R.id.fieldTempDesc);
         editText.setVisibility(editing ? View.VISIBLE : View.GONE);
-        if (editing)
-            editText.requestFocus();
+        if (editing) editText.requestFocus();
     }
 
     @Override
     public void setModel(Task m) {
-        if (_task == m)
-            return;
+        if (_task == m) return;
         Task oldTask = _task;
         _task = m;
+        if (oldTask != null) oldTask.deleteObserver(this);
+        if (_task != null) _task.addObserver(this);
         grabController();
         refresh();
-        if (oldTask == null)
-            hookListeners();
+        if (oldTask == null) hookListeners();
     }
 
     @Override
     public void update(Observable observable, Object data) {
-        if (_task != observable)
-            return;
+        if (_task != observable) return;
         refresh();
 
     }
