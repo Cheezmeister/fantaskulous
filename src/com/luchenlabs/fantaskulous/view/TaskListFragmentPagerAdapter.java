@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
 
 import com.luchenlabs.fantaskulous.G;
@@ -23,12 +24,16 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
         _fragments = new ArrayList<TaskListFragment>(10);
     }
 
+    public void destroyItem(ViewPager viewPager, int position) {
+        TaskListFragment taskListFragment = _fragments.get(position);
+        if (taskListFragment == null) throw new IllegalStateException("No fragment at position " + position);
+        super.destroyItem(viewPager, position, taskListFragment);
+    }
+
     @Override
     public int getCount() {
         FantaskulousModel model = G.getState().getModel();
-        if (model == null)
-            return 0;
-//        Log.v(getClass().getSimpleName(), "getCount called, giving " + model.taskLists.size()); //$NON-NLS-1$
+        if (model == null) return 0;
         return model.taskLists.size();
     }
 

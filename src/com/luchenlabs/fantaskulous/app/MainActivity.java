@@ -117,8 +117,7 @@ public class MainActivity extends AbstractActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (resultCode != RESULT_OK)
-            return;
+        if (resultCode != RESULT_OK) return;
 
         if (requestCode == CODE_IMPORT) {
             Uri uri = data.getData();
@@ -196,7 +195,6 @@ public class MainActivity extends AbstractActivity {
         } else {
             Log.i(getClass().getSimpleName(), "Finishing onStart with " + model.taskLists.size() + "lists"); //$NON-NLS-1$ //$NON-NLS-2$
             finishOnStart(model);
-            G.getState().getDataSource().begAndPleadToBloodyUpdateTheDamnFile();
         }
     }
 
@@ -219,9 +217,11 @@ public class MainActivity extends AbstractActivity {
     private void removeList() {
         int position = _viewPager.getCurrentItem();
         CharSequence name = _pagerAdapter.getPageTitle(position);
-        _controller.removeTaskList(G.getState().getModel().taskLists, name);
-        refresh();
-        _viewPager.setAdapter(_pagerAdapter);
+        if (_controller.removeTaskList(G.getState().getModel().taskLists, name)) {
+            _pagerAdapter.destroyItem(_viewPager, position);
+            _viewPager.setAdapter(_pagerAdapter);
+            refresh();
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -254,8 +254,7 @@ public class MainActivity extends AbstractActivity {
                     // back
                     Log.w(getClass().getSimpleName(), "Trying " + noc);
                     is = noc.fetchMeAnInputStream();
-                    if (is == null)
-                        continue;
+                    if (is == null) continue;
                     Log.w(getClass().getSimpleName(), "Found a stream with " + noc); //$NON-NLS-1$
 
                     try {
@@ -325,8 +324,7 @@ public class MainActivity extends AbstractActivity {
 
                     os = noc.fetchMeAnOutputStream();
 
-                    if (os == null)
-                        continue;
+                    if (os == null) continue;
 
                     try {
                         persister.save(os, G.getState().getModel());
