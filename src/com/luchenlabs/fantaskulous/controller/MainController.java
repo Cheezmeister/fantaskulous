@@ -2,6 +2,7 @@ package com.luchenlabs.fantaskulous.controller;
 
 import java.util.List;
 
+import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.model.SigillyTaskList;
 import com.luchenlabs.fantaskulous.model.Task;
 import com.luchenlabs.fantaskulous.model.TaskContext;
@@ -36,9 +37,14 @@ public class MainController {
 
     public boolean removeTaskList(List<TaskList> lists, CharSequence name) {
         for (TaskList list : lists) {
-            if (list.getName().equals(name))
-                return lists.remove(list);
+            if (list.getName().equals(name)) return lists.remove(list);
         }
         return false;
+    }
+
+    public void sortAll(List<TaskList> lists) {
+        for (TaskList list : lists) {
+            G.getState().getTaskListController().sortList(list);
+        }
     }
 }

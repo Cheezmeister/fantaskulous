@@ -3,8 +3,6 @@
  */
 package com.luchenlabs.fantaskulous.view;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -79,7 +77,7 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 CharSequence text = fieldDescription.getText();
                 if (text.length() == 0)
-                    return false;
+                return false;
 
                 if (actionId == EditorInfo.IME_ACTION_DONE ||
                         (event != null && event.getAction() == KeyEvent.ACTION_DOWN)) {
@@ -191,23 +189,6 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
     @Override
     public void update(Observable arg0, Object arg1) {
-
-        // TODO abstract sorting away
-        Comparator<Task> comparator = new Comparator<Task>() {
-            @Override
-            public int compare(Task lhs, Task rhs) {
-                int compComp = Boolean.valueOf(lhs.isComplete()).compareTo(rhs.isComplete());
-                if (compComp != 0)
-                    return compComp;
-
-                int priComp = lhs.getPriority().compareTo(rhs.getPriority());
-                if (priComp != 0)
-                    return priComp;
-                return 0; // TODO lhs.getDate().compareTo(rhs.getDate());
-            }
-
-        };
-        Collections.sort(_taskList.getTasks(), comparator);
         ((TaskArrayAdapter) _listView.getAdapter()).refresh();
     }
 

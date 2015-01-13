@@ -23,75 +23,6 @@ import com.luchenlabs.fantaskulous.core.C;
 
 public class DropboxCoreNook implements NookOrCranny {
 
-    private final String _filename;
-
-    private final Context _context;
-
-    public DropboxCoreNook(Context context, String filename) {
-        this._filename = filename;
-        this._context = context;
-    }
-
-    @Override
-    public void begAndPleadToBloodyUpdateTheDamnFile() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void cleanup() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public InputStream fetchMeAnInputStream() {
-        Session instance = Session.getInstance();
-        instance.initialize(_context, true);
-        DropboxAPI<AndroidAuthSession> api = instance.getAPI();
-
-        if (api == null)
-            return null;
-
-        InputStream stream = null;
-        try {
-            stream = api.getFileStream(_filename, null);
-        } catch (DropboxServerException e) {
-            Log.e(getClass().getSimpleName(), "Got a http " + e.error + "; " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
-        } catch (DropboxException e) {
-            Log.e(getClass().getSimpleName(), "Unexpected dbx exception: " + e.getMessage()); //$NON-NLS-1$
-        }
-        return stream;
-    }
-
-    @Override
-    public OutputStream fetchMeAnOutputStream() {
-        Session instance = Session.getInstance();
-        instance.initialize(_context, true);
-        final DropboxAPI<AndroidAuthSession> api = instance.getAPI();
-
-        if (api == null)
-            return null;
-
-        DbxUploadStream stream = new DbxUploadStream() {
-
-            @Override
-            public void write() {
-                InputStream is = new ByteArrayInputStream(this.toByteArray());
-                try {
-                    Entry e = api.putFileOverwrite(_filename, is, this.size(), null);
-                    Log.i(getClass().getSimpleName(), "Bytes written to Dropbox: " + e.bytes); //$NON-NLS-1$
-                } catch (DropboxServerException e) {
-                    Log.e(getClass().getSimpleName(), "Got a http " + e.error + "; " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
-                } catch (DropboxException e) {
-                    Log.e(getClass().getSimpleName(), "Unexpected dbx exception: " + e.getMessage()); //$NON-NLS-1$
-                }
-            }
-        };
-
-        return stream;
-    }
-
     /**
      * This is disgusting. Dropbox requires an inputstream to feed it data, but
      * {@link MainActivity} likes to feed into outputstreams.
@@ -151,10 +82,8 @@ public class DropboxCoreNook implements NookOrCranny {
         }
 
         protected DropboxAPI<AndroidAuthSession> getAPI() {
-            if (_session == null)
-                return null;
-            if (!_session.isLinked())
-                return null;
+            if (_session == null) return null;
+            if (!_session.isLinked()) return null;
             return new DropboxAPI<AndroidAuthSession>(_session);
         }
 
@@ -190,6 +119,77 @@ public class DropboxCoreNook implements NookOrCranny {
 
         }
 
+    }
+
+    private final String _filename;
+
+    private final Context _context;
+
+    public DropboxCoreNook(Context context, String filename) {
+        this._filename = filename;
+        this._context = context;
+    }
+
+    @Override
+    public void begAndPleadToBloodyUpdateTheDamnFile() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void cleanup() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public InputStream fetchMeAnInputStream() {
+        Log.v(getClass().getSimpleName(), "Getting instance");
+        Session instance = Session.getInstance();
+        Log.v(getClass().getSimpleName(), "Initing instance");
+        instance.initialize(_context, true);
+        Log.v(getClass().getSimpleName(), "Getting api");
+        DropboxAPI<AndroidAuthSession> api = instance.getAPI();
+
+        if (api == null) return null;
+
+        Log.v(getClass().getSimpleName(), "Getting stream");
+        InputStream stream = null;
+        try {
+            stream = api.getFileStream(_filename, null);
+        } catch (DropboxServerException e) {
+            Log.e(getClass().getSimpleName(), "Got a http " + e.error + "; " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+        } catch (DropboxException e) {
+            Log.e(getClass().getSimpleName(), "Unexpected dbx exception: " + e.getMessage()); //$NON-NLS-1$
+        }
+        return stream;
+    }
+
+    @Override
+    public OutputStream fetchMeAnOutputStream() {
+        Session instance = Session.getInstance();
+        instance.initialize(_context, true);
+        final DropboxAPI<AndroidAuthSession> api = instance.getAPI();
+
+        if (api == null) return null;
+
+        DbxUploadStream stream = new DbxUploadStream() {
+
+            @Override
+            public void write() {
+                InputStream is = new ByteArrayInputStream(this.toByteArray());
+                try {
+                    Entry e = api.putFileOverwrite(_filename, is, this.size(), null);
+                    Log.i(getClass().getSimpleName(), "Bytes written to Dropbox: " + e.bytes); //$NON-NLS-1$
+                } catch (DropboxServerException e) {
+                    Log.e(getClass().getSimpleName(), "Got a http " + e.error + "; " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+                } catch (DropboxException e) {
+                    Log.e(getClass().getSimpleName(), "Unexpected dbx exception: " + e.getMessage()); //$NON-NLS-1$
+                }
+            }
+        };
+
+        return stream;
     }
 
 }

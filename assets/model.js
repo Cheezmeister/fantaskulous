@@ -32,5 +32,9 @@
       }
       return task;
     }
+  	fromTodoTxt: function(line) {
+  		// completion,date,priority,text,projects,contexts,key-value-pairs
+		var toTxtRegex = /(x )?(\d{4}-\d{2}-d{2})?(\([A-Z]\) )?(.*)((?: +[\w_]+)+)((?: @[\w_]+)+)
+	}
   };
 })();
