@@ -3,13 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <view
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    <ListView
         android:id="@+id/taskListListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/fieldDesc"
-        class="com.luchenlabs.fantaskulous.view.TaskListListView" />
+		/>
 
     <EditText
         android:id="@+id/fieldDesc"

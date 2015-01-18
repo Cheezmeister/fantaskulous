@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
@@ -36,7 +37,7 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
 
     private TaskList _taskList;
     private TaskListController _controller;
-    private TaskListListView _listView;
+    private ListView _listView;
 
     public TaskListView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -165,7 +166,7 @@ public class TaskListView extends RelativeLayout implements Observer, FView<Task
             task.addObserver(this);
         }
 
-        _listView = (TaskListListView) findViewById(R.id.taskListListView);
+        _listView = (ListView) findViewById(R.id.taskListListView);
         _listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         _listView.setOnItemClickListener(new OnItemClickListener() {
 
