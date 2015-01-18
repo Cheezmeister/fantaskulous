@@ -4,18 +4,14 @@ import java.util.Observable;
 import java.util.Observer;
 
 import android.content.Context;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 
 import com.luchenlabs.fantaskulous.G;
 import com.luchenlabs.fantaskulous.R;
@@ -75,31 +71,11 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
     }
 
     private void hookListeners() {
-        final EditText fieldDesc = (EditText) findViewById(R.id.fieldTempDesc);
-        final View lblDesc = findViewById(R.id.lblDesc);
 
         findViewById(R.id.btnPriority).setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 _controller.cyclePriority(_task);
-            }
-        });
-        lblDesc.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                setEditModeState(true);
-            }
-        });
-
-        fieldDesc.setOnEditorActionListener(new OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE ||
-                        (event != null && event.getAction() == KeyEvent.ACTION_DOWN)) {
-                    _controller.changeDescription(_task, fieldDesc.getText().toString());
-                    setEditModeState(false);
-                }
-                return false;
             }
         });
 
@@ -158,29 +134,12 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
         ImageView btnPriority = (ImageView) findViewById(R.id.btnPriority);
         TextView textView = (TextView) findViewById(R.id.lblDesc);
         CheckBox checkComplete = (CheckBox) findViewById(R.id.checkComplete);
-        EditText fieldDesc = (EditText) findViewById(R.id.fieldTempDesc);
 
         String description = _task.getDescription();
         btnPriority.setImageResource(iconForPriority(_task.getPriority()));
         btnPriority.setContentDescription(_task.getPriority().toString());
         textView.setText(description);
-        fieldDesc.setText(description);
         checkComplete.setChecked(_task.isComplete());
-    }
-
-    /**
-     * Toggle between displaying a {@link TextView} and {@link EditText} to
-     * allow user to edit the title in place.
-     *
-     * This is kind of hackish.
-     *
-     * @param editing
-     */
-    private void setEditModeState(boolean editing) {
-        findViewById(R.id.lblDesc).setVisibility(editing ? View.GONE : View.VISIBLE);
-        EditText editText = (EditText) findViewById(R.id.fieldTempDesc);
-        editText.setVisibility(editing ? View.VISIBLE : View.GONE);
-        if (editing) editText.requestFocus();
     }
 
     @Override
