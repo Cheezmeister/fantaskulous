@@ -4,22 +4,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
 import com.luchenlabs.fantaskulous.R;
-import com.luchenlabs.fantaskulous.app.MainActivity;
 
 public class FallbackAssetCranny implements NookOrCranny {
 
     /**
-     * 
+     *
      */
-    private final MainActivity _mainActivity;
+    private final Context _context;
     private final String _filename;
 
-    public FallbackAssetCranny(MainActivity mainActivity, String filename) {
-        _mainActivity = mainActivity;
+    public FallbackAssetCranny(Context context, String filename) {
+        _context = context;
         this._filename = filename;
     }
 
@@ -36,10 +36,10 @@ public class FallbackAssetCranny implements NookOrCranny {
     @Override
     public InputStream fetchMeAnInputStream() {
         try {
-            AssetManager assetManager = _mainActivity.getAssets();
+            AssetManager assetManager = _context.getAssets();
             return assetManager.open(_filename);
         } catch (IOException e) {
-            Log.wtf(getClass().getSimpleName(), _mainActivity.getString(R.string.fmt_not_found, _filename, e));
+            Log.wtf(getClass().getSimpleName(), _context.getString(R.string.fmt_not_found, _filename, e));
         }
         return null;
     }

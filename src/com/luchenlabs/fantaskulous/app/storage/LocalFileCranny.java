@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.luchenlabs.fantaskulous.R;
@@ -12,13 +13,13 @@ import com.luchenlabs.fantaskulous.app.MainActivity;
 public class LocalFileCranny implements NookOrCranny {
 
     /**
-     * 
+     *
      */
-    private final MainActivity _mainActivity;
+    private final Context _context;
     private final String _filename;
 
-    public LocalFileCranny(MainActivity mainActivity, String filename) {
-        _mainActivity = mainActivity;
+    public LocalFileCranny(Context context, String filename) {
+        _context = context;
         this._filename = filename;
     }
 
@@ -35,9 +36,9 @@ public class LocalFileCranny implements NookOrCranny {
     @Override
     public InputStream fetchMeAnInputStream() {
         try {
-            return _mainActivity.openFileInput(_filename);
+            return _context.openFileInput(_filename);
         } catch (FileNotFoundException e) {
-            Log.w(getClass().getSimpleName(), _mainActivity.getString(R.string.fmt_not_found, _filename, e));
+            Log.w(getClass().getSimpleName(), _context.getString(R.string.fmt_not_found, _filename, e));
         }
         return null;
     }
@@ -45,9 +46,9 @@ public class LocalFileCranny implements NookOrCranny {
     @Override
     public OutputStream fetchMeAnOutputStream() {
         try {
-            return _mainActivity.openFileOutput(_filename, MainActivity.MODE_PRIVATE);
+            return _context.openFileOutput(_filename, MainActivity.MODE_PRIVATE);
         } catch (FileNotFoundException e) {
-            Log.e(getClass().getSimpleName(), _mainActivity.getString(R.string.fmt_access_denied, _filename, e));
+            Log.e(getClass().getSimpleName(), _context.getString(R.string.fmt_access_denied, _filename, e));
         }
         return null;
     }

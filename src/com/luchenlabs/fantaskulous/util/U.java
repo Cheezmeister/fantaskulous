@@ -13,8 +13,10 @@ import java.util.regex.Pattern;
 
 import org.joda.time.DateTime;
 
+import android.content.Context;
 import android.util.Log;
 
+import com.luchenlabs.fantaskulous.R;
 import com.luchenlabs.fantaskulous.core.C;
 import com.luchenlabs.fantaskulous.model.FantaskulousModel;
 import com.luchenlabs.fantaskulous.model.Priority;
@@ -26,27 +28,24 @@ import com.luchenlabs.fantaskulous.model.TaskProject;
 
 /**
  * Utilities
- * 
+ *
  * @author cheezmeister
- * 
+ *
  */
 public class U {
 
+    public static final class Android {
+        public static String ex(Context context, Exception e, int resId, Object... args) {
+            return context.getString(resId, args) + "\n" //$NON-NLS-1$
+                    + context.getString(R.string.fmt_the_exception_thrown_was, e.toString());
+        }
+    }
+
     /**
      * Utils for todo.txt
-     * 
+     *
      */
     public static final class Todo {
-
-        private static final String UNFILED_TITLE = "(Unfiled)";
-        private static final String TODO_LOWEST = "(E) "; //$NON-NLS-1$
-        private static final String TODO_LOW = "(D) "; //$NON-NLS-1$
-        private static final String TODO_MEDIUM = "(C) "; //$NON-NLS-1$
-        private static final String TODO_HIGH = "(B) "; //$NON-NLS-1$
-        private static final String TODO_HIGHEST = "(A) "; //$NON-NLS-1$
-        private static final String KEY_GUID = "guid"; //$NON-NLS-1$
-        private static final String KEY_BLOCKS = "blocks"; //$NON-NLS-1$
-        private static final String KEY_BLOCKED_BY = "blocked_by"; //$NON-NLS-1$
 
         static Priority fromAlphaPriority(char letter) {
             if (letter == TODO_HIGHEST.charAt(1)) { return Priority.HIGHEST; }
@@ -82,8 +81,7 @@ public class U {
             Scanner reader = new Scanner(new InputStreamReader(input));
             while (reader.hasNextLine()) {
                 String line = reader.nextLine();
-                if (line.length() == 0)
-                    continue;
+                if (line.length() == 0) continue;
 
                 Log.w("U", "Line: " + line);
 
@@ -150,14 +148,14 @@ public class U {
 
         /**
          * Read a line from todo.txt, construct a task and add it to any lists
-         * 
+         *
          * @param line
          *            The input line
          * @param oLists
          *            Existing {@link TaskList}s. If null, projects and contexts
          *            will be ignored. Any lists not already present in oLists
          *            will be created and appended to it.
-         * 
+         *
          * @return
          */
         public static Task taskFromTodoTxt(String line, List<TaskList> oLists) {
@@ -166,7 +164,7 @@ public class U {
             final String optionalDate = "(\\d{4}-\\d{2}-\\d{2})"; //$NON-NLS-1$
             final String optionalPriority = "(\\([A-Z]\\) )"; //$NON-NLS-1$
             final String text = "(.*?)"; //$NON-NLS-1$
-            final String optionalProjects = "((?: \\+[\\w_]+)+)"; //$NON-NLS-1$ 
+            final String optionalProjects = "((?: \\+[\\w_]+)+)"; //$NON-NLS-1$
             final String optionalContexts = "((?: @[\\w_]+)+)"; //$NON-NLS-1$
             final String optionalKeyValuePairs = "((?: \\w+:\\S+)+)"; //$NON-NLS-1$
             // TODO optionalFollowups /YYYY-MM-DD
@@ -184,12 +182,10 @@ public class U {
             Matcher o = pattern.matcher(line);
 
             // Parse the line
-            if (!o.matches())
-                throw new IllegalArgumentException(line);
+            if (!o.matches()) throw new IllegalArgumentException(line);
 
             // Check for an empty line
-            if (o.group(0).length() == 0)
-                return null;
+            if (o.group(0).length() == 0) return null;
 
             // Completion status
             String complete = o.group(1);
@@ -246,7 +242,7 @@ public class U {
 
         /**
          * Convert a single task to todo.txt format
-         * 
+         *
          * @param task
          *            The task
          * @return One line in todo.txt format representing the task
@@ -274,6 +270,23 @@ public class U {
 
             return sb;
         }
+
+        private static final String UNFILED_TITLE = "(Unfiled)";
+        private static final String TODO_LOWEST = "(E) "; //$NON-NLS-1$
+
+        private static final String TODO_LOW = "(D) "; //$NON-NLS-1$
+
+        private static final String TODO_MEDIUM = "(C) "; //$NON-NLS-1$
+
+        private static final String TODO_HIGH = "(B) "; //$NON-NLS-1$
+
+        private static final String TODO_HIGHEST = "(A) "; //$NON-NLS-1$
+
+        private static final String KEY_GUID = "guid"; //$NON-NLS-1$
+
+        private static final String KEY_BLOCKS = "blocks"; //$NON-NLS-1$
+
+        private static final String KEY_BLOCKED_BY = "blocked_by"; //$NON-NLS-1$
 
     }
 

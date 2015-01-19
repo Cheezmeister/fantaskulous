@@ -7,12 +7,16 @@ import android.support.v4.app.FragmentActivity;
 import android.widget.EditText;
 
 import com.luchenlabs.fantaskulous.R;
+import com.luchenlabs.fantaskulous.util.U;
 
 public class AbstractActivity extends FragmentActivity {
 
+    public interface StringRunnable {
+        public void run(String string);
+    }
+
     protected String ex(Exception e, int resId, Object... args) {
-        return getString(resId, args) + "\n" //$NON-NLS-1$
-                + getString(R.string.fmt_the_exception_thrown_was, e.toString());
+        return U.Android.ex(this, e, resId, args);
     }
 
     protected void showTextInputDialog(String title, String hint, final StringRunnable onString) {
@@ -29,9 +33,5 @@ public class AbstractActivity extends FragmentActivity {
         });
 
         alert.show();
-    }
-
-    public interface StringRunnable {
-        public void run(String string);
     }
 }
