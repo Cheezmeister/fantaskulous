@@ -10,11 +10,11 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.luchenlabs.fantaskulous.controller.TaskListController;
-import com.luchenlabs.fantaskulous.model.FantaskulousModel;
-import com.luchenlabs.fantaskulous.model.Task;
-import com.luchenlabs.fantaskulous.model.TaskContext;
-import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fkls.controller.TaskListController;
+import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.Task;
+import com.luchenlabs.fkls.model.TaskContext;
+import com.luchenlabs.fkls.model.TaskList;
 
 /**
  * @author cheezmeister
@@ -47,7 +47,7 @@ public class TaskListTest {
 
     /**
      * Test method for
-     * {@link com.luchenlabs.fantaskulous.controller.TaskListController#addTask(java.lang.CharSequence)}
+     * {@link com.luchenlabs.fkls.controller.TaskListController#addTask(java.lang.CharSequence)}
      * .
      */
     @Test

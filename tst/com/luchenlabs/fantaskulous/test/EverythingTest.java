@@ -21,17 +21,17 @@ import org.apache.commons.io.input.CharSequenceInputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.luchenlabs.fantaskulous.IPersister;
-import com.luchenlabs.fantaskulous.JsonPersister;
-import com.luchenlabs.fantaskulous.TodoTxtPersister;
-import com.luchenlabs.fantaskulous.controller.MainController;
-import com.luchenlabs.fantaskulous.controller.TaskListController;
-import com.luchenlabs.fantaskulous.core.C;
-import com.luchenlabs.fantaskulous.model.FantaskulousModel;
-import com.luchenlabs.fantaskulous.model.Priority;
-import com.luchenlabs.fantaskulous.model.Task;
-import com.luchenlabs.fantaskulous.model.TaskContext;
-import com.luchenlabs.fantaskulous.model.TaskList;
+import com.luchenlabs.fkls.IPersister;
+import com.luchenlabs.fkls.JsonPersister;
+import com.luchenlabs.fkls.TodoTxtPersister;
+import com.luchenlabs.fkls.controller.MainController;
+import com.luchenlabs.fkls.controller.TaskListController;
+import com.luchenlabs.fkls.core.C;
+import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.Priority;
+import com.luchenlabs.fkls.model.Task;
+import com.luchenlabs.fkls.model.TaskContext;
+import com.luchenlabs.fkls.model.TaskList;
 
 public class EverythingTest {
 

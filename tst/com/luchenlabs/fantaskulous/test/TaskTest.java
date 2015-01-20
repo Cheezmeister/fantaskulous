@@ -14,15 +14,15 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.luchenlabs.fantaskulous.controller.TaskController;
-import com.luchenlabs.fantaskulous.core.C;
-import com.luchenlabs.fantaskulous.model.Priority;
-import com.luchenlabs.fantaskulous.model.Task;
-import com.luchenlabs.fantaskulous.model.TaskContext;
-import com.luchenlabs.fantaskulous.model.TaskList;
-import com.luchenlabs.fantaskulous.model.TaskProject;
-import com.luchenlabs.fantaskulous.util.U;
-import com.luchenlabs.fantaskulous.util.U.Todo;
+import com.luchenlabs.fkls.controller.TaskController;
+import com.luchenlabs.fkls.core.C;
+import com.luchenlabs.fkls.model.Priority;
+import com.luchenlabs.fkls.model.Task;
+import com.luchenlabs.fkls.model.TaskContext;
+import com.luchenlabs.fkls.model.TaskList;
+import com.luchenlabs.fkls.model.TaskProject;
+import com.luchenlabs.fkls.util.U;
+import com.luchenlabs.fkls.util.U.Todo;
 
 public class TaskTest {
 
