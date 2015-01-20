@@ -23,7 +23,7 @@ import com.luchenlabs.fkls.app.storage.LoadTaskListTask;
 import com.luchenlabs.fkls.app.storage.SaveTaskListTask;
 import com.luchenlabs.fkls.app.storage.LoadTaskListTask.LoadResult;
 import com.luchenlabs.fkls.controller.MainController;
-import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.FklsModel;
 import com.luchenlabs.fkls.model.TaskList;
 import com.luchenlabs.fkls.view.TaskListFragmentPagerAdapter;
 
@@ -56,7 +56,7 @@ public class MainActivity extends AbstractActivity {
 
     private void export() {
         Intent send = new Intent(Intent.ACTION_SEND);
-        FantaskulousModel model = G.getState().getModel();
+        FklsModel model = G.getState().getModel();
         if (model == null) {
             Log.wtf(getClass().getSimpleName(), "No model found"); //$NON-NLS-1$
         }
@@ -65,7 +65,7 @@ public class MainActivity extends AbstractActivity {
         startActivity(Intent.createChooser(send, getString(R.string.export_tasks)));
     }
 
-    private void finishOnStart(FantaskulousModel model) {
+    private void finishOnStart(FklsModel model) {
         _controller = G.getState().getMainController();
 
         handleNewDataLoaded(model);
@@ -75,12 +75,12 @@ public class MainActivity extends AbstractActivity {
     }
 
     void handleFinishedLoading(LoadTaskListTask.LoadResult result) {
-        FantaskulousModel model = result.model;
+        FklsModel model = result.model;
         G.getState().setDataSource(result.nookOrCranny);
         finishOnStart(model);
     }
 
-    private void handleNewDataLoaded(FantaskulousModel model) {
+    private void handleNewDataLoaded(FklsModel model) {
         G.getState().getMainController().sortAll(model.taskLists);
         G.getState().setModel(model);
         _pagerAdapter = new TaskListFragmentPagerAdapter(
@@ -169,7 +169,7 @@ public class MainActivity extends AbstractActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        FantaskulousModel model = G.getState().getModel();
+        FklsModel model = G.getState().getModel();
         if (model == null) {
             _spinner.setVisibility(View.VISIBLE);
             Log.i(getClass().getSimpleName(), "Kicking off load task"); //$NON-NLS-1$
@@ -214,7 +214,7 @@ public class MainActivity extends AbstractActivity {
 
     @SuppressWarnings("unchecked")
     private void saveTasks() {
-        FantaskulousModel model = G.getState().getModel();
+        FklsModel model = G.getState().getModel();
         if (model != null) {
             new SaveTaskListTask(this, null).execute(model.taskLists);
         }

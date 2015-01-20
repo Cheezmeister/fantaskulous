@@ -12,7 +12,7 @@ import java.util.UUID;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.luchenlabs.fkls.core.C;
-import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.FklsModel;
 import com.luchenlabs.fkls.model.ListOLists;
 import com.luchenlabs.fkls.model.Task;
 import com.luchenlabs.fkls.model.TaskList;
@@ -40,13 +40,13 @@ public class JsonPersister implements IPersister {
      * @see com.luchenlabs.fantaskulous.IPersister#load(java.io.InputStream)
      */
     @Override
-    public FantaskulousModel load(InputStream is) {
+    public FklsModel load(InputStream is) {
         InputStreamReader reader = new InputStreamReader(is);
         Gson gson = new Gson();
         ListOLists lol = gson.fromJson(reader, ListOLists.class);
         if (lol == null)
             return null;
-        FantaskulousModel model = new FantaskulousModel();
+        FklsModel model = new FklsModel();
         model.taskLists = lol.lists;
         model.tasks = new HashMap<UUID, Task>();
         for (TaskList l : model.taskLists) {
@@ -64,7 +64,7 @@ public class JsonPersister implements IPersister {
      * java.util.ArrayList)
      */
     @Override
-    public void save(OutputStream os, FantaskulousModel model) throws IOException {
+    public void save(OutputStream os, FklsModel model) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(os);
         writer.write(getJSON(model.taskLists));
         writer.close();

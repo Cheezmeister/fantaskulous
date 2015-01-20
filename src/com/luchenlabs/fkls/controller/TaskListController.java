@@ -3,7 +3,7 @@ package com.luchenlabs.fkls.controller;
 import java.util.Collections;
 import java.util.Comparator;
 
-import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.FklsModel;
 import com.luchenlabs.fkls.model.Task;
 import com.luchenlabs.fkls.model.TaskList;
 
@@ -27,7 +27,7 @@ public class TaskListController {
 
     };
 
-    public Task addTask(FantaskulousModel model, TaskList taskList, CharSequence description) {
+    public Task addTask(FklsModel model, TaskList taskList, CharSequence description) {
         Task task = new Task(taskList, description.toString());
         model.tasks.put(task.getGUID(), task);
         taskList.addTask(task);

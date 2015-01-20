@@ -27,7 +27,7 @@ import com.luchenlabs.fkls.TodoTxtPersister;
 import com.luchenlabs.fkls.controller.MainController;
 import com.luchenlabs.fkls.controller.TaskListController;
 import com.luchenlabs.fkls.core.C;
-import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.FklsModel;
 import com.luchenlabs.fkls.model.Priority;
 import com.luchenlabs.fkls.model.Task;
 import com.luchenlabs.fkls.model.TaskContext;
@@ -38,13 +38,13 @@ public class EverythingTest {
     private static final String NAME = "Empty"; //$NON-NLS-1$
     private MainController controller;
     private List<TaskList> taskLists;
-    private FantaskulousModel model;
+    private FklsModel model;
     private final String guid = "64517894-D7D5-11E3-B47E-D62D9A125B5A".toLowerCase();
     private Map<UUID, Task> tasks;
 
     @Before
     public void setUp() throws Exception {
-        model = new FantaskulousModel();
+        model = new FklsModel();
         model.taskLists = new ArrayList<TaskList>();
         model.tasks = new HashMap<UUID, Task>();
         taskLists = model.taskLists;

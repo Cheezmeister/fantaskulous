@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import com.luchenlabs.fkls.core.C;
-import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.FklsModel;
 import com.luchenlabs.fkls.model.Task;
 import com.luchenlabs.fkls.util.U;
 
@@ -18,12 +18,12 @@ public class TodoTxtPersister implements IPersister {
     }
 
     @Override
-    public FantaskulousModel load(InputStream is) {
+    public FklsModel load(InputStream is) {
         return U.Todo.modelFromTodoTxt(is);
     }
 
     @Override
-    public void save(OutputStream os, FantaskulousModel model) throws IOException {
+    public void save(OutputStream os, FklsModel model) throws IOException {
         PrintWriter pw = new PrintWriter(os);
         for (Task t : model.tasks.values()) {
             pw.append(U.Todo.toTodoTxt(t)).append('\n');

@@ -14,7 +14,7 @@ import java.util.UUID;
  * 
  * @author cheezmeister
  */
-public class FantaskulousModel {
+public class FklsModel {
     public Map<UUID, Task> tasks = new HashMap<UUID, Task>();
     // TODO public List<Task> tasks; /* ORDER MATTERS! */
     public List<TaskList> taskLists = new ArrayList<TaskList>();

@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 
 import com.luchenlabs.fkls.G;
 import com.luchenlabs.fkls.R;
-import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.FklsModel;
 import com.luchenlabs.fkls.view.TaskListView;
 
 public class TaskListFragment extends Fragment {
@@ -47,7 +47,7 @@ public class TaskListFragment extends Fragment {
 
     public void updateTaskListView(final TaskListView taskListView) {
         taskListView.invalidate();
-        FantaskulousModel model = G.getState().getModel();
+        FklsModel model = G.getState().getModel();
         if (model != null) {
             taskListView.setModel(model.taskLists.get(_position));
         }

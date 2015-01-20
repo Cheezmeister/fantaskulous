@@ -4,7 +4,7 @@ import com.luchenlabs.fkls.app.storage.NookOrCranny;
 import com.luchenlabs.fkls.controller.MainController;
 import com.luchenlabs.fkls.controller.TaskController;
 import com.luchenlabs.fkls.controller.TaskListController;
-import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.FklsModel;
 
 /**
  * Globals
@@ -15,7 +15,7 @@ import com.luchenlabs.fkls.model.FantaskulousModel;
 public class G {
     public static class State {
 
-        private FantaskulousModel model;
+        private FklsModel model;
         private NookOrCranny dataSource;
 
         private final MainController mainController;
@@ -45,7 +45,7 @@ public class G {
         /**
          * @return the global data model
          */
-        public FantaskulousModel getModel() {
+        public FklsModel getModel() {
             return this.model;
         }
 
@@ -77,7 +77,7 @@ public class G {
          * 
          * @param model
          */
-        public void setModel(FantaskulousModel model) {
+        public void setModel(FklsModel model) {
             this.model = model;
 
         }

@@ -15,7 +15,7 @@ import com.luchenlabs.fkls.DumbCallback;
 import com.luchenlabs.fkls.IPersister;
 import com.luchenlabs.fkls.R;
 import com.luchenlabs.fkls.app.storage.LoadTaskListTask.LoadResult;
-import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.FklsModel;
 import com.luchenlabs.fkls.model.Task;
 import com.luchenlabs.fkls.model.TaskList;
 import com.luchenlabs.fkls.util.U;
@@ -23,7 +23,7 @@ import com.luchenlabs.fkls.util.U;
 public class LoadTaskListTask extends FklsStorageTask<Void, LoadResult> {
 
     public class LoadResult {
-        public FantaskulousModel model;
+        public FklsModel model;
         public NookOrCranny nookOrCranny;
 
     }
@@ -39,7 +39,7 @@ public class LoadTaskListTask extends FklsStorageTask<Void, LoadResult> {
     protected LoadResult doInBackground(Void... params) {
         InputStream is = null;
 
-        FantaskulousModel model = null;
+        FklsModel model = null;
         LoadResult result = new LoadResult();
         for (IPersister persister : _persisters) {
             String filename = persister.getDefaultFilename();
@@ -82,7 +82,7 @@ public class LoadTaskListTask extends FklsStorageTask<Void, LoadResult> {
             }
         }
         Log.wtf(getClass().getSimpleName(), "Couldn't load a blasted thing!"); //$NON-NLS-1$
-        model = new FantaskulousModel();
+        model = new FklsModel();
         model.taskLists = new ArrayList<TaskList>();
         model.tasks = new HashMap<UUID, Task>();
         result.model = model;

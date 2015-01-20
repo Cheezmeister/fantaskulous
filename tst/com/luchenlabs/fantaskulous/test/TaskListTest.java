@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.luchenlabs.fkls.controller.TaskListController;
-import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.FklsModel;
 import com.luchenlabs.fkls.model.Task;
 import com.luchenlabs.fkls.model.TaskContext;
 import com.luchenlabs.fkls.model.TaskList;
@@ -52,7 +52,7 @@ public class TaskListTest {
      */
     @Test
     public final void testAddTask() {
-        FantaskulousModel model = new FantaskulousModel();
+        FklsModel model = new FklsModel();
         Task t = parent.addTask(model, list, "this is a task");
         assertNotNull(t);
         assertTrue(list.getTasks().contains(t));

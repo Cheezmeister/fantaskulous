@@ -18,7 +18,7 @@ import android.util.Log;
 
 import com.luchenlabs.fkls.R;
 import com.luchenlabs.fkls.core.C;
-import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.FklsModel;
 import com.luchenlabs.fkls.model.Priority;
 import com.luchenlabs.fkls.model.SigillyTaskList;
 import com.luchenlabs.fkls.model.Task;
@@ -74,8 +74,8 @@ public class U {
             }
         }
 
-        public static FantaskulousModel modelFromTodoTxt(InputStream input) {
-            FantaskulousModel model = new FantaskulousModel();
+        public static FklsModel modelFromTodoTxt(InputStream input) {
+            FklsModel model = new FklsModel();
             model.taskLists = new ArrayList<TaskList>();
 
             Scanner reader = new Scanner(new InputStreamReader(input));

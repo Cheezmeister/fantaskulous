@@ -11,7 +11,7 @@ import android.util.Log;
 
 import com.luchenlabs.fkls.G;
 import com.luchenlabs.fkls.app.TaskListFragment;
-import com.luchenlabs.fkls.model.FantaskulousModel;
+import com.luchenlabs.fkls.model.FklsModel;
 import com.luchenlabs.fkls.model.TaskList;
 
 public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
@@ -32,7 +32,7 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount() {
-        FantaskulousModel model = G.getState().getModel();
+        FklsModel model = G.getState().getModel();
         if (model == null) return 0;
         return model.taskLists.size();
     }
@@ -46,7 +46,7 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
         TaskListFragment fragment = _fragments.get(position);
         Bundle args = new Bundle();
         args.putInt(TaskListFragment.ARG_TASKLIST, position);
-        FantaskulousModel model = G.getState().getModel();
+        FklsModel model = G.getState().getModel();
         if (model != null && _newList != null && _newList == model.taskLists.get(position)) {
             args.putBoolean(TaskListFragment.ARG_IS_NEW, true);
         }
@@ -69,7 +69,7 @@ public class TaskListFragmentPagerAdapter extends FragmentPagerAdapter {
      */
     @Override
     public CharSequence getPageTitle(int position) {
-        FantaskulousModel model = G.getState().getModel();
+        FklsModel model = G.getState().getModel();
         if (model == null) {
             Log.w(getClass().getSimpleName(), "Title for null list at position " + position); //$NON-NLS-1$
             return "Unknown"; //$NON-NLS-1$
