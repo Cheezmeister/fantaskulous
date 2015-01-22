@@ -123,14 +123,14 @@ public class TaskView extends RelativeLayout implements FView<Task>, Observer {
 
     @Override
     protected void onCreateContextMenu(ContextMenu menu) {
-        SubMenu sub = menu.addSubMenu("Move");
+        SubMenu sub = menu.addSubMenu(R.string.move);
         for (final TaskList l : G.getState().getModel().taskLists) {
             MenuItem item = sub.add(l.getName());
             item.setOnMenuItemClickListener(new OnMenuItemClickListener() {
                 @Override
                 public boolean onMenuItemClick(MenuItem item) {
                     // FIXME this breaks if multiple contexts are associated.
-                    G.getState().getMainController().moveTaskToList(_task, _task.getContexts().first(), l);
+                    G.getState().getMainController().moveTaskToList(_task, _task.getContexts(), l);
                     return true;
                 }
             });

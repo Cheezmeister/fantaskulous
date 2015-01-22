@@ -10,9 +10,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.UUID;
 
 import junit.framework.Assert;
@@ -41,6 +44,12 @@ public class EverythingTest {
     private FklsModel model;
     private final String guid = "64517894-D7D5-11E3-B47E-D62D9A125B5A".toLowerCase();
     private Map<UUID, Task> tasks;
+
+    private Collection<? extends TaskList> collectionOf(TaskList list) {
+        SortedSet<TaskList> lists = new TreeSet<TaskList>();
+        lists.add(list);
+        return lists;
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -130,17 +139,14 @@ public class EverythingTest {
 
         assertTrue(oldList.getTasks().contains(task));
         assertFalse(newList.getTasks().contains(task));
-        assertTrue(controller.moveTaskToList(task, oldList, newList));
+        assertTrue(controller.moveTaskToList(task, collectionOf(oldList), newList));
         assertFalse(oldList.getTasks().contains(task));
         assertTrue(newList.getTasks().contains(task));
-        assertTrue(controller.moveTaskToList(task, newList, oldList));
+        assertTrue(controller.moveTaskToList(task, collectionOf(newList), oldList));
         assertTrue(oldList.getTasks().contains(task));
         assertFalse(newList.getTasks().contains(task));
-        assertTrue(controller.moveTaskToNextList(task, oldList, taskLists));
-        assertFalse(oldList.getTasks().contains(task));
-        assertTrue(newList.getTasks().contains(task));
 
-        assertFalse(controller.moveTaskToList(task, oldList, newList));
+        assertFalse(controller.moveTaskToList(task, collectionOf(newList), oldList));
 
     }
 

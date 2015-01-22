@@ -1,10 +1,11 @@
 package com.luchenlabs.fkls.model;
 
-
 /**
  * A {@link TaskList} which uses a sigil to denote its type. Specifically,
  * {@link TaskProject +projects} and {@link TaskContext @contexts} implement
  * this class.
+ *
+ * TODO Collapse this hierarchy to one concrete class
  *
  * @author cheezmeister
  */

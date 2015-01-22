@@ -3,3 +3,5 @@ butter @groceries
 eggs @groceries
 vacuum @home
 trash @home
+Unfiled
+Both @home @groceries

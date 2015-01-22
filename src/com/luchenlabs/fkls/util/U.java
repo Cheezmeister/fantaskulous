@@ -114,10 +114,11 @@ public class U {
                     }
                 }
                 if (list == null) {
-                    list = new TaskList(UNFILED_TITLE);
+                    list = new TaskContext(UNFILED_TITLE);
                     oLists.add(list);
                 }
                 list.addTask(task);
+                task.getContexts().add((TaskContext) list);
                 return;
             }
 
@@ -271,7 +272,7 @@ public class U {
             return sb;
         }
 
-        private static final String UNFILED_TITLE = "(Unfiled)";
+        private static final String UNFILED_TITLE = "unfiled";
         private static final String TODO_LOWEST = "(E) "; //$NON-NLS-1$
 
         private static final String TODO_LOW = "(D) "; //$NON-NLS-1$

@@ -81,7 +81,6 @@ public class TaskList extends Observable implements Observer, Comparable<TaskLis
         boolean modified = tasks.remove(task);
         if (modified) {
             setChanged();
-            notifyObservers();
         }
         return modified;
     }
@@ -109,7 +108,7 @@ public class TaskList extends Observable implements Observer, Comparable<TaskLis
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
     @Override

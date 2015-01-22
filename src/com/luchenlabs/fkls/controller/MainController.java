@@ -1,5 +1,6 @@
 package com.luchenlabs.fkls.controller;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.luchenlabs.fkls.G;
@@ -16,17 +17,14 @@ public class MainController {
         return list;
     }
 
-    public boolean moveTaskToList(Task task, TaskList oldList, TaskList newList) {
-        boolean modified = oldList.removeTask(task);
+    public boolean moveTaskToList(Task task, Collection<? extends TaskList> oldLists, TaskList newList) {
+        boolean modified = false;
+        for (TaskList l : oldLists) {
+            modified |= l.removeTask(task);
+        }
         newList.addTask(task);
+        task.notifyObservers();
         return modified;
-    }
-
-    public boolean moveTaskToNextList(Task task, TaskList currentList, List<TaskList> lists) {
-        int newListIndex = lists.indexOf(currentList) + 1;
-        newListIndex %= lists.size();
-        TaskList newList = lists.get(newListIndex);
-        return moveTaskToList(task, currentList, newList);
     }
 
     public void removeAllCompletedTasks(List<TaskList> lists) {
