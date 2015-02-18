@@ -12,6 +12,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.DropboxAPI.DropboxInputStream;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.DropboxAPI.UploadRequest;
 import com.dropbox.client2.android.AndroidAuthSession;
@@ -58,7 +59,7 @@ public class DropboxCoreNook implements NookOrCranny {
 
         private static Session instance;
 
-        private AndroidAuthSession _session;
+        private AndroidAuthSession _authSession;
 
         private Session() {
         }
@@ -71,20 +72,20 @@ public class DropboxCoreNook implements NookOrCranny {
          * @see #initialize(Context, boolean)
          */
         public boolean completeAuth(Context context) {
-            if (_session != null && _session.authenticationSuccessful()) {
-                _session.finishAuthentication();
-                String oaString = _session.getOAuth2AccessToken();
+            if (_authSession != null && _authSession.authenticationSuccessful()) {
+                _authSession.finishAuthentication();
+                String oaString = _authSession.getOAuth2AccessToken();
                 SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
                 prefs.edit().putString(C.KEY_PREF_DBX_OAUTH_TOKEN, oaString).commit();
-                return _session.isLinked();
+                return _authSession.isLinked();
             }
             return false;
         }
 
         protected DropboxAPI<AndroidAuthSession> getAPI() {
-            if (_session == null) return null;
-            if (!_session.isLinked()) return null;
-            return new DropboxAPI<AndroidAuthSession>(_session);
+            if (_authSession == null) throw new IllegalStateException("Missing dropbox session"); //$NON-NLS-1$
+            if (!_authSession.isLinked()) return null;
+            return new DropboxAPI<AndroidAuthSession>(_authSession);
         }
 
         /**
@@ -102,19 +103,19 @@ public class DropboxCoreNook implements NookOrCranny {
          *            linked. Defaults to false
          */
         public void initialize(Context context, boolean suppressAuth) {
-            if (_session != null && _session.isLinked()) { return; }
+            if (_authSession != null && _authSession.isLinked()) { return; }
 
             AppKeyPair keypair = new AppKeyPair(C.DBX_APP_KEY, C.DBX_APP_SECRET);
-            _session = new AndroidAuthSession(keypair);
+            _authSession = new AndroidAuthSession(keypair);
 
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             String oauthToken = prefs.getString(C.KEY_PREF_DBX_OAUTH_TOKEN, null);
 
             if (oauthToken != null) {
-                _session.setOAuth2AccessToken(oauthToken);
+                _authSession.setOAuth2AccessToken(oauthToken);
             } else if (!suppressAuth) {
                 Log.i(getClass().getSimpleName(), "No oauth token found, need to auth dropbox"); //$NON-NLS-1$
-                _session.startOAuth2Authentication(context);
+                _authSession.startOAuth2Authentication(context);
             }
 
         }
@@ -154,15 +155,22 @@ public class DropboxCoreNook implements NookOrCranny {
         if (api == null) return null;
 
         Log.v(getClass().getSimpleName(), "Getting stream");
-        InputStream stream = null;
-        try {
-            stream = api.getFileStream(_filename, null);
-        } catch (DropboxServerException e) {
-            Log.e(getClass().getSimpleName(), "Got a http " + e.error + "; " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
-        } catch (DropboxException e) {
-            Log.e(getClass().getSimpleName(), "Unexpected dbx exception: " + e.getMessage()); //$NON-NLS-1$
+        for (int i = 0; i < 3; ++i) {
+            try {
+                DropboxInputStream stream = api.getFileStream(_filename, null);
+                if (stream != null) return stream;
+            } catch (DropboxServerException e) {
+                Log.e(getClass().getSimpleName(), "Got a http " + e.error + "; " + e.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
+            } catch (DropboxException e) {
+                Log.e(getClass().getSimpleName(), "Unexpected dbx exception: " + e.getMessage()); //$NON-NLS-1$
+            }
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                // Fuck you, Java.
+            }
         }
-        return stream;
+        return null;
     }
 
     @Override

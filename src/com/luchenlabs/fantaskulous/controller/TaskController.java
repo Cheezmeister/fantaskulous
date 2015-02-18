@@ -1,10 +1,9 @@
-package com.luchenlabs.fkls.controller;
 
-import com.luchenlabs.fkls.G;
-import com.luchenlabs.fkls.core.C;
-import com.luchenlabs.fkls.model.Priority;
-import com.luchenlabs.fkls.model.Task;
-import com.luchenlabs.fkls.model.TaskList;
+package com.luchenlabs.fantaskulous.controller;
+
+import com.luchenlabs.fantaskulous.core.C;
+import com.luchenlabs.fantaskulous.model.Priority;
+import com.luchenlabs.fantaskulous.model.Task;
 
 @SuppressWarnings("static-method")
 public class TaskController {
@@ -15,7 +14,6 @@ public class TaskController {
 
     public void complete(Task task, boolean isChecked) {
         task.setComplete(isChecked);
-        reSort(task);
         task.notifyObservers();
     }
 
@@ -27,14 +25,5 @@ public class TaskController {
                         Priority.MEDIUM;
 
         task.setPriority(newPri);
-
-        reSort(task);
-        task.notifyObservers();
-    }
-
-    private void reSort(Task task) {
-        for (TaskList list : task.getContexts()) {
-            G.getState().getTaskListController().sortList(list); // TODO HACK
-        }
     }
 }
