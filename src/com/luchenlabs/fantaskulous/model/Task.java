@@ -1,13 +1,13 @@
 package com.luchenlabs.fantaskulous.model;
 
+import com.google.gson.annotations.Expose;
+import com.luchenlabs.fantaskulous.core.C;
+
 import java.util.Date;
 import java.util.Observable;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
-
-import com.google.gson.annotations.Expose;
-import com.luchenlabs.fantaskulous.core.C;
 
 public class Task extends Observable {
 
@@ -80,10 +80,10 @@ public class Task extends Observable {
     }
 
     public void setComplete(boolean isComplete) {
+        if (this.completed == isComplete) return;
         this.completed = isComplete;
         this.priority = Priority.NONE;
         setChanged();
-        notifyObservers();
     }
 
     public void setDate(Date date) {

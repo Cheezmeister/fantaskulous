@@ -1,7 +1,5 @@
 package com.luchenlabs.fantaskulous.model;
 
-import org.eclipse.jdt.annotation.NonNull;
-
 /**
  * A {@link TaskList} which uses a sigil to denote its type. Specifically,
  * {@link TaskProject +projects} and {@link TaskContext @contexts} implement
@@ -27,7 +25,7 @@ public abstract class SigillyTaskList extends TaskList {
     protected abstract char getSigil();
 
     @Override
-    public void setName(@NonNull String name) {
+    public void setName(String name) {
         if (name == null)
             throw new IllegalArgumentException("name cannot be null"); //$NON-NLS-1$
         if (name.contains(String.valueOf(getSigil()))) {

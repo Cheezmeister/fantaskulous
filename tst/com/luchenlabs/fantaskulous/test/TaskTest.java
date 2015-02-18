@@ -1,19 +1,5 @@
 package com.luchenlabs.fantaskulous.test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.luchenlabs.fantaskulous.controller.TaskController;
 import com.luchenlabs.fantaskulous.core.C;
 import com.luchenlabs.fantaskulous.model.Priority;
@@ -23,6 +9,20 @@ import com.luchenlabs.fantaskulous.model.TaskList;
 import com.luchenlabs.fantaskulous.model.TaskProject;
 import com.luchenlabs.fantaskulous.util.U;
 import com.luchenlabs.fantaskulous.util.U.Todo;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class TaskTest {
 
@@ -68,7 +68,7 @@ public class TaskTest {
     public void testDiscardPriorityOnComplete() {
         Priority old = task.getPriority();
         assertNotNull(old);
-        assertNotEquals(Priority.NONE, old);
+        assertNotSame(Priority.NONE, old);
         task.setComplete(true);
         assertEquals(Priority.NONE, task.getPriority());
 
@@ -78,7 +78,7 @@ public class TaskTest {
     public final void testPriority() {
         Priority old = task.getPriority();
         controller.cyclePriority(task);
-        assertNotEquals(old, task.getPriority());
+        assertNotSame(old, task.getPriority());
     }
 
     @Test

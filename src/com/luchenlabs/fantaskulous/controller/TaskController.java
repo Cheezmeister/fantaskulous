@@ -13,6 +13,7 @@ public class TaskController {
 
     public void complete(Task task, boolean isChecked) {
         task.setComplete(isChecked);
+        task.notifyObservers();
     }
 
     public void cyclePriority(Task task) {
